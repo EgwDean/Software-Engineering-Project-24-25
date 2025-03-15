@@ -1,1 +1,1 @@
-All deliverables are to be commited here.
+All deliverables are to be committed here.
