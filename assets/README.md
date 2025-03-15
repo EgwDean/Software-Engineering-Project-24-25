@@ -1,1 +1,1 @@
-All assets (multimedia) used in the project are to be commited here.
+All assets (multimedia) used in the project are to be committed here.
