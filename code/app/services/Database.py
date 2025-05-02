@@ -22,11 +22,14 @@ class Database:
 
             if cls.connection.is_connected():
                 print("Successfully connected to the database.")
+                return cls.connection
 
         except FileNotFoundError:
             print(f"Password file not found at {cls.password_file}")
         except mysql.connector.Error as e:
             print(f"Error while connecting to MySQL: {e}")
+        
+        return None
 
     @classmethod
     def close(cls):

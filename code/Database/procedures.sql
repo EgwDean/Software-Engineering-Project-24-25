@@ -2,10 +2,8 @@ USE car_rental;
 
 DELIMITER $
 DROP PROCEDURE IF EXISTS login$
-CREATE PROCEDURE login(IN username VARCHAR(50), IN password VARCHAR(50), OUT type VARCHAR(50))
+CREATE PROCEDURE login(IN name VARCHAR(50), IN pass VARCHAR(50), OUT type VARCHAR(50))
 BEGIN 
-	DECLARE name VARCHAR(50);
-    DECLARE pass VARCHAR(50);
     DECLARE user_count INT;
 	DECLARE admin_count INT;
     
@@ -28,7 +26,7 @@ BEGIN
 	END IF;
     
 	IF (user_count = 0 AND admin_count = 0) THEN
-		SET type = 'NONE';
+		SET type = 'none';
 	END IF;
 END$
 DELIMITER ;
