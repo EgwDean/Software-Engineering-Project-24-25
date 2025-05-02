@@ -5,7 +5,7 @@ class Database:
     host = 'localhost'
     user = 'root'
     database = 'car_rental'
-    password_file = Path(__file__).parent.parent / 'db_password.txt'
+    password_file = Path(__file__).parent.parent.parent / 'db_password.txt'
     connection = None
 
     @classmethod
