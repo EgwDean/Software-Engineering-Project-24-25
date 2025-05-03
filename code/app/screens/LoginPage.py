@@ -1,4 +1,4 @@
-from services.Database import Database
+import services.Database as DB
 from pathlib import Path
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QLineEdit, QPushButton,
@@ -112,5 +112,5 @@ class LoginPage(QWidget):
         username = self.username_input.text()
         password = self.password_input.text()
 
-        db = Database()
+        db = DB.Database()
         db.connect()
