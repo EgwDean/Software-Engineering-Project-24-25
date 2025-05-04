@@ -10,6 +10,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsDropShadowEffect
 from screens.SignUpPage import SignUpPage  # Import the SignUpPage class
+from screens.MenuScreen import MenuScreen  # Import the MenuScreen class
 
 
 class LoginPage(QWidget):
@@ -179,7 +180,9 @@ class LoginPage(QWidget):
                 return SU.StandardUser(username)
             elif login_type == 'admin':
                 print("Logged in as an admin.")
-                return AD.Admin(username)
+                self.admin_window = MenuScreen(AD.Admin(username))
+                self.admin_window.show()
+                self.close()
             else:
                 self.error_label.setText("Invalid credentials!")
                 return None  
