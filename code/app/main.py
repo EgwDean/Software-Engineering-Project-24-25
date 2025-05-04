@@ -1,4 +1,4 @@
-import services.Database as Database # IMPORTANT, DO NOT OMIT
+import services.Database as Database  # IMPORTANT, DO NOT OMIT
 import entities.StandardUser as SU
 import entities.Admin as AD
 import sys
@@ -8,13 +8,15 @@ from screens.LoginPage import LoginPage
 # Main function to start the application
 def main():
     app = QApplication(sys.argv)
+
+    # Start with the LoginPage
     login_page = LoginPage()
     login_page.show()
 
     # Wait for the login process to complete
     app.exec_()
 
-    # Call the login function and handle the returned object
+    # Handle the returned object from the login process
     user = login_page.login()
     if isinstance(user, SU.StandardUser):
         print(f"Welcome, {user.username}! You are logged in as a Standard User.")
