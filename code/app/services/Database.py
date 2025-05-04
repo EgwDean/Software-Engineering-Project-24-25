@@ -13,6 +13,7 @@ class Database:
         try:
             password = cls.password_file.read_text(encoding='utf-8').strip()
 
+            print("Creating connection...")
             cls.connection = mysql.connector.connect(
                 host=cls.host,
                 user=cls.user,
@@ -23,6 +24,8 @@ class Database:
             if cls.connection.is_connected():
                 print("Successfully connected to the database.")
                 return cls.connection
+            else:
+                print("Failed to connect to the database.")
 
         except FileNotFoundError:
             print(f"Password file not found at {cls.password_file}")
@@ -30,6 +33,7 @@ class Database:
             print(f"Error while connecting to MySQL: {e}")
         
         return None
+
 
     @classmethod
     def close(cls):

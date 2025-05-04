@@ -1,4 +1,6 @@
 import services.Database as DB
+import entities.StandardUser as SU
+import entities.Admin as AD
 from pathlib import Path
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QLineEdit, QPushButton,
@@ -8,11 +10,16 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsDropShadowEffect
 
+
 class LoginPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Login Page")
         self.setStyleSheet("background-color: #f0f0f0;")
+
+        # Initialize database connection
+        self.db_connection = None
+        self.init_db_connection()
 
         # Hardcoded logo path
         logo_path = Path(__file__).parent.parent.parent / 'assets' / 'logo_1.png'
@@ -36,7 +43,7 @@ class LoginPage(QWidget):
                 border: 1px solid #dcdcdc;
             }
         """)
-        frame.setFixedWidth(int(self.width() * 0.5)) 
+        frame.setFixedWidth(400)  # Set a fixed width for the frame
         frame_layout = QVBoxLayout()
         frame_layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
 
@@ -51,7 +58,7 @@ class LoginPage(QWidget):
         logo_label = QLabel()
         pixmap = QPixmap(logo_path_str)
         logo_label.setPixmap(pixmap.scaledToWidth(200, Qt.SmoothTransformation))
-        logo_label.setAlignment(Qt.AlignCenter) 
+        logo_label.setAlignment(Qt.AlignCenter)
         logo_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         frame_layout.addWidget(logo_label, alignment=Qt.AlignHCenter)
 
@@ -59,6 +66,7 @@ class LoginPage(QWidget):
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Username")
         self.username_input.setStyleSheet("padding: 8px; font-size: 14px;")
+        self.username_input.textChanged.connect(self.check_fields)  # Connect to check_fields
         frame_layout.addWidget(self.username_input)
 
         # Password field
@@ -66,7 +74,14 @@ class LoginPage(QWidget):
         self.password_input.setPlaceholderText("Password")
         self.password_input.setEchoMode(QLineEdit.Password)
         self.password_input.setStyleSheet("padding: 8px; font-size: 14px;")
+        self.password_input.textChanged.connect(self.check_fields)  # Connect to check_fields
         frame_layout.addWidget(self.password_input)
+
+        # Error message label
+        self.error_label = QLabel("")
+        self.error_label.setStyleSheet("color: red; font-size: 12px; border: none;")  # No border
+        self.error_label.setAlignment(Qt.AlignCenter)
+        frame_layout.addWidget(self.error_label)
 
         # Buttons
         button_layout = QHBoxLayout()
@@ -80,8 +95,8 @@ class LoginPage(QWidget):
                 padding: 8px 16px;
                 border-radius: 5px;
             }
-            QPushButton:hover {
-                background-color: #87ceeb;
+            QPushButton:pressed {
+                background-color: #4682b4;  /* Darker blue for click effect */
             }
         """)
         self.signup_button.setStyleSheet("""
@@ -96,21 +111,74 @@ class LoginPage(QWidget):
                 background-color: #87ceeb;
             }
         """)
+        self.login_button.setEnabled(False)  # Disable the login button by default
+        self.login_button.clicked.connect(self.login)
         button_layout.addWidget(self.login_button)
         button_layout.addWidget(self.signup_button)
 
         frame_layout.addLayout(button_layout)
         frame.setLayout(frame_layout)
 
-        self.login_button.clicked.connect(self.login)
-
         # Add frame to main layout
         main_layout.addWidget(frame)
         self.setLayout(main_layout)
 
-    def login(self): # TODO
-        username = self.username_input.text()
-        password = self.password_input.text()
+    def check_fields(self):
+        """Enable the login button only if both fields are filled."""
+        username = self.username_input.text().strip()
+        password = self.password_input.text().strip()
+        if username and password:
+            self.login_button.setEnabled(True)
+            self.error_label.setText("")
+        else:
+            self.login_button.setEnabled(False)
 
-        db = DB.Database()
-        db.connect()
+    def init_db_connection(self):
+        """Initialize the database connection."""
+        try:
+            db = DB.Database()
+            self.db_connection = db.connect()
+
+            if self.db_connection is None:
+                print("Failed to connect to the database.")
+        except Exception as e:
+            print(f"An error occurred while connecting to the database: {e}")
+
+    def login(self):
+        """Handle login button click."""
+        username = self.username_input.text().strip()
+        password = self.password_input.text().strip()
+
+        if not username or not password:
+            self.error_label.setText("Both fields are required!")
+            return None  # Return None if fields are empty
+
+        try:
+            if self.db_connection is None:
+                print("No database connection available.")
+                return None
+
+            # Call the login stored procedure
+            cursor = self.db_connection.cursor()
+            out_type = cursor.callproc('login', [username, password, None])
+
+            # Retrieve the OUT parameter
+            login_type = out_type[2]
+
+            # Close the cursor
+            cursor.close()
+
+            # Handle the login type
+            if login_type == 'user':
+                print("Logged in as a user.")
+                return SU.StandardUser(username)
+            elif login_type == 'admin':
+                print("Logged in as an admin.")
+                return AD.Admin(username)
+            else:
+                self.error_label.setText("Invalid credentials!")
+                return None  
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return None
