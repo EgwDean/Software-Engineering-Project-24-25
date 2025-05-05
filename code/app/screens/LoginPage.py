@@ -1,6 +1,7 @@
 import services.Database as DB
 import entities.StandardUser as SU
 import entities.Admin as AD
+from PyQt5.QtCore import Qt, pyqtSignal
 from pathlib import Path
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QLineEdit, QPushButton,
@@ -13,6 +14,7 @@ from screens.SignUpPage import SignUpPage  # Import the SignUpPage class
 
 
 class LoginPage(QWidget):
+    login_successful = pyqtSignal(object)
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Login Page")
@@ -176,10 +178,14 @@ class LoginPage(QWidget):
             # Handle the login type
             if login_type == 'user':
                 print("Logged in as a user.")
-                return SU.StandardUser(username)
+                user = SU.StandardUser(username)
+                self.login_successful.emit(user)
+                return user
             elif login_type == 'admin':
                 print("Logged in as an admin.")
-                return AD.Admin(username)
+                user = AD.Admin(username)
+                self.login_successful.emit(user)
+                return user
             else:
                 self.error_label.setText("Invalid credentials!")
                 return None  
