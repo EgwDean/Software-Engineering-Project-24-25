@@ -183,6 +183,7 @@ class LoginPage(QWidget):
                 self.admin_window = MenuScreen(AD.Admin(username))
                 self.admin_window.show()
                 self.close()
+                return AD.Admin(username)
             else:
                 self.error_label.setText("Invalid credentials!")
                 return None  
