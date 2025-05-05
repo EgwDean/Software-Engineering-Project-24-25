@@ -59,9 +59,3 @@ class StandardUser:
 
         except Exception as e:
             print(f"An error occurred while fetching user data: {e}")
-
-    def __str__(self):
-        return (
-            f"StandardUser: {self.username}, Email: {self.email}, Balance: {self.balance}, "
-            f"Address: {self.country}, {self.city}, {self.street}"
-        )
