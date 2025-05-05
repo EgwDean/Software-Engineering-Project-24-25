@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt
 from pathlib import Path
 import services.Database as DB
 from screens.ReviewPage import ReviewPage
+from screens.ReportPage import ReportPage
 
 class HistoryPage(QWidget):
     def __init__(self, user):
@@ -16,6 +17,7 @@ class HistoryPage(QWidget):
         self.setStyleSheet("background-color: #f9f9f9;")
         self.showMaximized()
 
+        # Logo image path
         self.logo_path = Path(__file__).parent.parent.parent / 'assets' / 'logo_1.png'
         self._init_ui()
 
@@ -45,12 +47,12 @@ class HistoryPage(QWidget):
         rentals = []
         if conn:
             cursor = conn.cursor(dictionary=True)
-            query = (
+            cursor.execute(
                 "SELECT v.id, v.brand, v.model, v.year, r.from_date, r.number_of_days "
                 "FROM rents r JOIN vehicle_listing v ON r.id_of_listing = v.id "
-                "WHERE r.user_who_rents = %s"
+                "WHERE r.user_who_rents = %s",
+                (self.user.username,)
             )
-            cursor.execute(query, (self.user.username,))
             rentals = cursor.fetchall()
             cursor.close()
             conn.close()
@@ -63,10 +65,27 @@ class HistoryPage(QWidget):
             return False
         try:
             cursor = conn.cursor()
-            query = (
-                "SELECT 1 FROM reviews WHERE name_reviewer = %s AND id_list_review = %s"
+            cursor.execute(
+                "SELECT 1 FROM reviews WHERE name_reviewer = %s AND id_list_review = %s",
+                (self.user.username, listing_id)
             )
-            cursor.execute(query, (self.user.username, listing_id))
+            exists = cursor.fetchone() is not None
+            cursor.close()
+            return exists
+        finally:
+            conn.close()
+
+    def _has_reported(self, listing_id):
+        db = DB.Database()
+        conn = db.connect()
+        if not conn:
+            return False
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT 1 FROM reports WHERE name_reporter = %s AND id_list_report = %s",
+                (self.user.username, listing_id)
+            )
             exists = cursor.fetchone() is not None
             cursor.close()
             return exists
@@ -94,10 +113,15 @@ class HistoryPage(QWidget):
         info.addWidget(QLabel(f"Duration: {rental['number_of_days']} days"))
         hbox.addLayout(info)
 
-        btn = QPushButton("Review")
-        btn.setFixedWidth(100)
-        btn.clicked.connect(lambda _, r=rental: self._open_review(r))
-        hbox.addWidget(btn, alignment=Qt.AlignRight)
+        btn_review = QPushButton("Review")
+        btn_review.setFixedWidth(80)
+        btn_review.clicked.connect(lambda _, r=rental: self._open_review(r))
+        hbox.addWidget(btn_review, alignment=Qt.AlignRight)
+
+        btn_report = QPushButton("Report")
+        btn_report.setFixedWidth(80)
+        btn_report.clicked.connect(lambda _, r=rental: self._open_report(r))
+        hbox.addWidget(btn_report, alignment=Qt.AlignRight)
 
         return box
 
@@ -106,4 +130,11 @@ class HistoryPage(QWidget):
             QMessageBox.information(self, "Already Reviewed", "You have already reviewed this rental.")
             return
         dialog = ReviewPage(self.user, rental['id'], self)
+        dialog.exec_()
+
+    def _open_report(self, rental):
+        if self._has_reported(rental['id']):
+            QMessageBox.information(self, "Already Reported", "You have already reported this rental.")
+            return
+        dialog = ReportPage(self.user, rental['id'], self)
         dialog.exec_()
