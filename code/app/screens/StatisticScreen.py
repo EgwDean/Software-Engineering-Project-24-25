@@ -8,21 +8,20 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
-from screens.StatisticScreen import StatisticScreen  # Import the MenuScreen class
 
-class MenuScreen(QWidget):
+
+class StatisticScreen(QWidget):
     def __init__(self, admin_user):
         super().__init__()
         self.admin_user = admin_user
-        self.setWindowTitle("Admin Menu")
+        self.setWindowTitle("Statistics")
         self.setStyleSheet("background-color: #f0f0f0;")
-        self.setFixedSize(800, 500)  # Set a fixed size for the window
+        self.setFixedSize(800, 500)
 
-        # Main layout
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Top menu layout
+        # Top menu
         top_menu_layout = QHBoxLayout()
         top_menu_layout.setAlignment(Qt.AlignLeft)
 
@@ -38,26 +37,24 @@ class MenuScreen(QWidget):
         top_menu_layout.addWidget(logo_label)
 
         # User icon
-        admin_user_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-user-30.png'
-        if not admin_user_icon_path.exists():
-            raise FileNotFoundError(f"User icon file not found at {admin_user_icon_path}")
-        admin_user_label = QLabel()
-        admin_user_pixmap = QPixmap(str(admin_user_icon_path))
-        admin_user_label.setPixmap(admin_user_pixmap.scaledToWidth(30, Qt.SmoothTransformation))
-        admin_user_label.setCursor(Qt.PointingHandCursor)
-        admin_user_label.mousePressEvent = self.do_nothing
-        top_menu_layout.addWidget(admin_user_label)
+        user_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-user-30.png'
+        if not user_icon_path.exists():
+            raise FileNotFoundError(f"User icon file not found at {user_icon_path}")
+        user_label = QLabel()
+        user_pixmap = QPixmap(str(user_icon_path))
+        user_label.setPixmap(user_pixmap.scaledToWidth(30, Qt.SmoothTransformation))
+        user_label.setCursor(Qt.PointingHandCursor)
+        user_label.mousePressEvent = self.do_nothing
+        top_menu_layout.addWidget(user_label)
 
-        # Username label
+        # Welcome label
         username_label = QLabel(f"Welcome, {self.admin_user.username}!")
-        username_label.setStyleSheet("font-size: 14px; margin-left: 0px; color: white;")
+        username_label.setStyleSheet("font-size: 14px; color: white;")
         top_menu_layout.addWidget(username_label)
 
-        # Spacer
         spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         top_menu_layout.addItem(spacer)
 
-        # Logout button
         logout_button = QPushButton("Logout")
         logout_button.setStyleSheet("""
             padding: 5px 15px;
@@ -71,72 +68,47 @@ class MenuScreen(QWidget):
         logout_button.clicked.connect(self.logout)
         top_menu_layout.addWidget(logout_button)
 
-        # Top menu frame
         top_menu_frame = QFrame()
         top_menu_frame.setLayout(top_menu_layout)
         top_menu_frame.setStyleSheet("background-color: skyblue; padding: 10px;")
         main_layout.addWidget(top_menu_frame)
 
-        # Main content layout
+        # Content layout
         content_layout = QHBoxLayout()
-        content_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Navigation menu
+        # Sidebar (Navigation)
         nav_menu = QVBoxLayout()
         nav_menu.setAlignment(Qt.AlignTop)
 
-        # Adding "Report Handling" button with frame
-        report_button = QPushButton("Report Handling")
-        report_button.setStyleSheet("""
+        back_button = QPushButton("Back to Menu")
+        back_button.setStyleSheet("""
             padding: 10px;
             font-size: 14px;
             background-color: skyblue;
-            border: none;
             color: white;
+            border: none;
             text-align: left;
         """)
-        report_button.clicked.connect(self.report_handling)
+        back_button.clicked.connect(self.back_to_menu)
 
-        # Frame for Report Handling button
-        report_button_frame = QFrame()
-        report_button_frame.setStyleSheet("border: 2px solid #ccc; padding: 5px; border-radius: 5px;")
-        report_button_layout = QVBoxLayout()
-        report_button_layout.addWidget(report_button)
-        report_button_frame.setLayout(report_button_layout)
-        nav_menu.addWidget(report_button_frame)
-
-        # Adding "View Statistics" button with frame
-        statistics_button = QPushButton("View Statistics")
-        statistics_button.setStyleSheet("""
-            padding: 10px;
-            font-size: 14px;
-            background-color: skyblue;
-            border: none;
-            color: white;
-            text-align: left;
-        """)
-        statistics_button.clicked.connect(self.view_statistics)
-
-        # Frame for View Statistics button
-        statistics_button_frame = QFrame()
-        statistics_button_frame.setStyleSheet("border: 2px solid #ccc; padding: 5px; border-radius: 5px;")
-        statistics_button_layout = QVBoxLayout()
-        statistics_button_layout.addWidget(statistics_button)
-        statistics_button_frame.setLayout(statistics_button_layout)
-        nav_menu.addWidget(statistics_button_frame)
+        back_button_frame = QFrame()
+        back_button_frame.setStyleSheet("border: 2px solid #ccc; padding: 5px; border-radius: 5px;")
+        back_button_layout = QVBoxLayout()
+        back_button_layout.addWidget(back_button)
+        back_button_frame.setLayout(back_button_layout)
+        nav_menu.addWidget(back_button_frame)
 
         nav_menu.addStretch()
-
         nav_menu_frame = QFrame()
         nav_menu_frame.setLayout(nav_menu)
         nav_menu_frame.setFixedWidth(200)
         nav_menu_frame.setStyleSheet("background-color: skyblue;")
         content_layout.addWidget(nav_menu_frame)
 
-        # Create the table widget for vehicle listings
+        # Statistics table
         table_widget = QTableWidget()
-        table_widget.setColumnCount(4)
-        table_widget.setHorizontalHeaderLabels(["Listing id", "User", "Brand", "Model"])
+        table_widget.setColumnCount(3)
+        table_widget.setHorizontalHeaderLabels(["Brand", "Total Listings", "Completed Sales"])
         table_widget.setStyleSheet("""
             QTableWidget {
                 font-size: 14px;
@@ -152,37 +124,28 @@ class MenuScreen(QWidget):
         """)
 
         table_widget.setShowGrid(True)
-        table_widget.setEditTriggers(QTableWidget.NoEditTriggers)  # Disable editing
+        table_widget.setEditTriggers(QTableWidget.NoEditTriggers)
         table_widget.setSelectionBehavior(QTableWidget.SelectRows)
         table_widget.setAlternatingRowColors(True)
 
-        # Title for the table section (Latest) above the table
-        latest_label = QLabel("Latest")
-        latest_label.setAlignment(Qt.AlignCenter)
-        latest_label.setStyleSheet("""
-            font-size: 18px;
-            font-style: italic;
-            color: #333;
-            font-family: 'Arial', sans-serif;
-            margin-bottom: 10px;
-        """)
-        
-        # Add the "Latest" label above the table
-        content_layout.addWidget(latest_label)
-
-        # Connect to the database and fetch the data
+        # Fetch statistics from database
         conn = DB.Database.connect()
         if conn and conn.is_connected():
             cursor = conn.cursor()
             try:
-                cursor.execute("SELECT id, name_of_user, brand, model FROM vehicle_listing WHERE status = 'completed' LIMIT 5;")
+                cursor.execute("""
+                    SELECT brand, COUNT(*), 
+                    SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END)
+                    FROM vehicle_listing
+                    GROUP BY brand;
+                """)
                 results = cursor.fetchall()
 
                 table_widget.setRowCount(len(results))
                 for row_index, row_data in enumerate(results):
                     for col_index, col_data in enumerate(row_data):
                         item = QTableWidgetItem(str(col_data))
-                        item.setFlags(Qt.ItemIsEnabled)  # Non-editable
+                        item.setFlags(Qt.ItemIsEnabled)
                         table_widget.setItem(row_index, col_index, item)
 
             except Exception as e:
@@ -195,10 +158,7 @@ class MenuScreen(QWidget):
             error_label = QLabel("Could not connect to database.")
             content_layout.addWidget(error_label)
 
-        # Add the table widget below the "Latest" title
         content_layout.addWidget(table_widget)
-
-        # Set the layout of the main window
         main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
 
@@ -216,14 +176,8 @@ class MenuScreen(QWidget):
     def do_nothing(self, event):
         pass
 
-    # Method for handling the "Report Handling" button
-    def report_handling(self):
-        print("Report Handling is clicked!")
-        # Add your logic for Report Handling here
-
-    # Method for handling the "View Statistics" button
-    def view_statistics(self):
-        print("View Statistics is clicked!")
-        self.admin_window = StatisticScreen(AD.Admin(self.admin_user.username))  # Create an instance of StatisticScreen
-        self.admin_window.show()  # Show the StatisticScreen window
-        self.close()  # Close the current MenuScreen window
+    def back_to_menu(self):
+        from screens.MenuScreen import MenuScreen
+        self.menu = MenuScreen(self.admin_user)
+        self.menu.show()
+        self.close()
