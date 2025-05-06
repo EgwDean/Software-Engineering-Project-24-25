@@ -1,0 +1,4 @@
+git clone -b <branch name> --single-branch https://github.com/EgwDean/Software-Engineering-Project-24-25
+git checkout <branch name>
+git fetch origin main:main
+git merge main
