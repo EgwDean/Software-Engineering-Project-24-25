@@ -5,7 +5,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from screens.LoginPage import LoginPage
 
-# Main function to start the application
+# Main function
 def main():
     app = QApplication(sys.argv)
 
