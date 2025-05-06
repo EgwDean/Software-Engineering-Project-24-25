@@ -115,7 +115,7 @@ class MenuScreen(QWidget):
             color: white;
             text-align: left;
         """)
-        statistics_button.clicked.connect(self.view_statistics)
+        statistics_button.clicked.connect(self.displayStatisticScreen)
 
         # Frame for View Statistics button
         statistics_button_frame = QFrame()
@@ -222,7 +222,7 @@ class MenuScreen(QWidget):
         # Add your logic for Report Handling here
 
     # Method for handling the "View Statistics" button
-    def view_statistics(self):
+    def displayStatisticScreen(self):
         print("View Statistics is clicked!")
         self.admin_window = StatisticScreen(AD.Admin(self.admin_user.username))  # Create an instance of StatisticScreen
         self.admin_window.show()  # Show the StatisticScreen window

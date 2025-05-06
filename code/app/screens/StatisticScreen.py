@@ -1,14 +1,12 @@
-import services.Database as DB
-import entities.StandardUser as SU
-import entities.Admin as AD
-from pathlib import Path
+from services.FilterStatistics import FilterStatistics
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QFrame,
-    QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem
+    QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem, QLineEdit,
+    QDialog, QCalendarWidget
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDate
 from PyQt5.QtGui import QPixmap
-
+from pathlib import Path
 
 class StatisticScreen(QWidget):
     def __init__(self, admin_user):
@@ -25,7 +23,6 @@ class StatisticScreen(QWidget):
         top_menu_layout = QHBoxLayout()
         top_menu_layout.setAlignment(Qt.AlignLeft)
 
-        # Logo
         logo_path = Path(__file__).parent.parent.parent / 'assets' / 'logo_1.png'
         if not logo_path.exists():
             raise FileNotFoundError(f"Logo file not found at {logo_path}")
@@ -33,10 +30,9 @@ class StatisticScreen(QWidget):
         pixmap = QPixmap(str(logo_path))
         logo_label.setPixmap(pixmap.scaledToWidth(70, Qt.SmoothTransformation))
         logo_label.setCursor(Qt.PointingHandCursor)
-        logo_label.mousePressEvent = self.reload_page
+        logo_label.mousePressEvent = self.back_to_menu
         top_menu_layout.addWidget(logo_label)
 
-        # User icon
         user_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-user-30.png'
         if not user_icon_path.exists():
             raise FileNotFoundError(f"User icon file not found at {user_icon_path}")
@@ -47,7 +43,6 @@ class StatisticScreen(QWidget):
         user_label.mousePressEvent = self.do_nothing
         top_menu_layout.addWidget(user_label)
 
-        # Welcome label
         username_label = QLabel(f"Welcome, {self.admin_user.username}!")
         username_label.setStyleSheet("font-size: 14px; color: white;")
         top_menu_layout.addWidget(username_label)
@@ -56,7 +51,7 @@ class StatisticScreen(QWidget):
         top_menu_layout.addItem(spacer)
 
         logout_button = QPushButton("Logout")
-        logout_button.setStyleSheet("""
+        logout_button.setStyleSheet(""" 
             padding: 5px 15px;
             font-size: 14px;
             background-color: #d9534f;
@@ -73,43 +68,61 @@ class StatisticScreen(QWidget):
         top_menu_frame.setStyleSheet("background-color: skyblue; padding: 10px;")
         main_layout.addWidget(top_menu_frame)
 
-        # Content layout
+        # --- Main Content with Sidebar ---
         content_layout = QHBoxLayout()
 
-        # Sidebar (Navigation)
-        nav_menu = QVBoxLayout()
-        nav_menu.setAlignment(Qt.AlignTop)
+        # Sidebar with filters
+        sidebar_layout = QVBoxLayout()
+        sidebar_layout.setAlignment(Qt.AlignTop)
+        sidebar_layout.setSpacing(10)
 
-        back_button = QPushButton("Back to Menu")
-        back_button.setStyleSheet("""
-            padding: 10px;
+        self.brand_input = QLineEdit()
+        self.brand_input.setPlaceholderText("Brand")
+        self.model_input = QLineEdit()
+        self.model_input.setPlaceholderText("Model")
+
+        self.date_input = QLineEdit()
+        self.date_input.setPlaceholderText("Date of Listing (YYYY-MM-DD)")
+        self.date_input.setReadOnly(True)
+        self.date_input.setStyleSheet("background-color: white;")
+        self.date_input.mousePressEvent = self.show_calendar
+
+        self.vehicle_type_input = QLineEdit()
+        self.vehicle_type_input.setPlaceholderText("Vehicle Type")
+
+        self.status_input = QLineEdit()
+        self.status_input.setPlaceholderText("Status")
+
+        filter_button = QPushButton("Filter")
+        filter_button.setStyleSheet(""" 
+            padding: 6px;
             font-size: 14px;
-            background-color: skyblue;
+            background-color: #5bc0de;
             color: white;
             border: none;
-            text-align: left;
+            border-radius: 4px;
         """)
-        back_button.clicked.connect(self.back_to_menu)
+        filter_button.clicked.connect(self.apply_filters)
 
-        back_button_frame = QFrame()
-        back_button_frame.setStyleSheet("border: 2px solid #ccc; padding: 5px; border-radius: 5px;")
-        back_button_layout = QVBoxLayout()
-        back_button_layout.addWidget(back_button)
-        back_button_frame.setLayout(back_button_layout)
-        nav_menu.addWidget(back_button_frame)
+        sidebar_layout.addWidget(self.brand_input)
+        sidebar_layout.addWidget(self.model_input)
+        sidebar_layout.addWidget(self.date_input)
+        sidebar_layout.addWidget(self.vehicle_type_input)
+        sidebar_layout.addWidget(self.status_input)
+        sidebar_layout.addWidget(filter_button)
+        sidebar_layout.addStretch()
 
-        nav_menu.addStretch()
-        nav_menu_frame = QFrame()
-        nav_menu_frame.setLayout(nav_menu)
-        nav_menu_frame.setFixedWidth(200)
-        nav_menu_frame.setStyleSheet("background-color: skyblue;")
-        content_layout.addWidget(nav_menu_frame)
+        sidebar_frame = QFrame()
+        sidebar_frame.setLayout(sidebar_layout)
+        sidebar_frame.setFixedWidth(180)
+        sidebar_frame.setStyleSheet("background-color: #e0f7fa; padding: 10px;")
+        content_layout.addWidget(sidebar_frame)
 
-        # Statistics table
-        table_widget = QTableWidget()
-        table_widget.setColumnCount(3)
-        table_widget.setHorizontalHeaderLabels(["Brand", "Total Listings", "Completed Sales"])
-        table_widget.setStyleSheet("""
+        # Table
+        self.table_widget = QTableWidget()
+        self.table_widget.setColumnCount(5)  # 5 columns (brand, model, vehicle_type, status, count)
+        self.table_widget.setHorizontalHeaderLabels(["Brand", "Model", "Vehicle Type", "Status", "Total Listings"])
+        self.table_widget.setStyleSheet(""" 
             QTableWidget {
                 font-size: 14px;
                 gridline-color: #ccc;
@@ -122,50 +135,64 @@ class StatisticScreen(QWidget):
                 border: none;
             }
         """)
+        self.table_widget.setShowGrid(True)
+        self.table_widget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.table_widget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table_widget.setAlternatingRowColors(True)
 
-        table_widget.setShowGrid(True)
-        table_widget.setEditTriggers(QTableWidget.NoEditTriggers)
-        table_widget.setSelectionBehavior(QTableWidget.SelectRows)
-        table_widget.setAlternatingRowColors(True)
-
-        # Fetch statistics from database
-        conn = DB.Database.connect()
-        if conn and conn.is_connected():
-            cursor = conn.cursor()
-            try:
-                cursor.execute("""
-                    SELECT brand, COUNT(*), 
-                    SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END)
-                    FROM vehicle_listing
-                    GROUP BY brand;
-                """)
-                results = cursor.fetchall()
-
-                table_widget.setRowCount(len(results))
-                for row_index, row_data in enumerate(results):
-                    for col_index, col_data in enumerate(row_data):
-                        item = QTableWidgetItem(str(col_data))
-                        item.setFlags(Qt.ItemIsEnabled)
-                        table_widget.setItem(row_index, col_index, item)
-
-            except Exception as e:
-                error_label = QLabel(f"Error: {e}")
-                content_layout.addWidget(error_label)
-            finally:
-                cursor.close()
-                conn.close()
-        else:
-            error_label = QLabel("Could not connect to database.")
-            content_layout.addWidget(error_label)
-
-        content_layout.addWidget(table_widget)
+        content_layout.addWidget(self.table_widget)
         main_layout.addLayout(content_layout)
+
         self.setLayout(main_layout)
 
-    def reload_page(self, event):
-        self.close()
-        self.__init__(self.admin_user)
-        self.show()
+        self.filter()
+
+    def filter(self, brand_filter="", model_filter="", date_filter="", vehicle_type_filter="", status_filter=""):
+        self.table_widget.setRowCount(0)
+        try:
+            results = FilterStatistics.fetch_statistics(brand_filter, model_filter, date_filter, vehicle_type_filter, status_filter)
+            self.display_statistics(results)
+        except Exception as e:
+            error_label = QLabel(f"Error: {e}")
+            self.layout().addWidget(error_label)
+
+    def apply_filters(self):
+        brand = self.brand_input.text().strip()
+        model = self.model_input.text().strip()
+        date = self.date_input.text().strip()
+        vehicle_type = self.vehicle_type_input.text().strip()
+        status = self.status_input.text().strip()
+        self.filter(brand_filter=brand, model_filter=model, date_filter=date, vehicle_type_filter=vehicle_type, status_filter=status)
+
+    def display_statistics(self, results):
+        # Populate the table with the results
+        self.table_widget.setRowCount(len(results))
+        for row_index, row_data in enumerate(results):
+            for col_index, col_data in enumerate(row_data):
+                item = QTableWidgetItem(str(col_data))
+                item.setFlags(Qt.ItemIsEnabled)
+                self.table_widget.setItem(row_index, col_index, item)
+
+    def show_calendar(self, event):
+        calendar_dialog = QDialog(self)
+        calendar_dialog.setWindowTitle("Select Date")
+        calendar_dialog.setModal(True)
+        layout = QVBoxLayout()
+        calendar = QCalendarWidget()
+        calendar.setGridVisible(True)
+        calendar.setMaximumDate(QDate.currentDate())
+        layout.addWidget(calendar)
+
+        select_btn = QPushButton("Select Date")
+        select_btn.clicked.connect(lambda: self.set_date_from_calendar(calendar.selectedDate(), calendar_dialog))
+        layout.addWidget(select_btn)
+
+        calendar_dialog.setLayout(layout)
+        calendar_dialog.exec_()
+
+    def set_date_from_calendar(self, selected_date, dialog):
+        self.date_input.setText(selected_date.toString("yyyy-MM-dd"))
+        dialog.accept()
 
     def logout(self):
         from screens.LoginPage import LoginPage
@@ -173,11 +200,11 @@ class StatisticScreen(QWidget):
         self.login_page.show()
         self.close()
 
-    def do_nothing(self, event):
-        pass
-
-    def back_to_menu(self):
+    def back_to_menu(self, event):
         from screens.MenuScreen import MenuScreen
         self.menu = MenuScreen(self.admin_user)
         self.menu.show()
         self.close()
+
+    def do_nothing(self, event):
+        pass
