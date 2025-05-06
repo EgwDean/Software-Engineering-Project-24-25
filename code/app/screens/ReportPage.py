@@ -17,7 +17,6 @@ class ReportPage(QDialog):
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
-
         layout.addWidget(QLabel("Describe your report (max 1000 chars):"))
         self.report_edit = QTextEdit()
         self.report_edit.setPlaceholderText("Write your report here...")
