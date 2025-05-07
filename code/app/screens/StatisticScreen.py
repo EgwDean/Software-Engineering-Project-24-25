@@ -7,6 +7,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QDate
 from PyQt5.QtGui import QPixmap
 from pathlib import Path
+from services.Graph import Graph
+from screens.GraphScreen import GraphScreen
 
 class StatisticScreen(QWidget):
     def __init__(self, admin_user):
@@ -104,12 +106,25 @@ class StatisticScreen(QWidget):
         """)
         filter_button.clicked.connect(self.apply_filters)
 
+        graph_button = QPushButton("Show Graph")
+        graph_button.setStyleSheet("""
+            padding: 6px;
+            font-size: 14px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        """)
+        graph_button.clicked.connect(self.show_graph)
+
+
         sidebar_layout.addWidget(self.brand_input)
         sidebar_layout.addWidget(self.model_input)
         sidebar_layout.addWidget(self.date_input)
         sidebar_layout.addWidget(self.vehicle_type_input)
         sidebar_layout.addWidget(self.status_input)
         sidebar_layout.addWidget(filter_button)
+        sidebar_layout.addWidget(graph_button)
         sidebar_layout.addStretch()
 
         sidebar_frame = QFrame()
@@ -208,3 +223,26 @@ class StatisticScreen(QWidget):
 
     def do_nothing(self, event):
         pass
+
+    def show_graph(self):
+        # Fetch statistics (could also be done with the current filters applied)
+        try:
+            results = FilterStatistics.fetch_statistics(
+                self.brand_input.text().strip(),
+                self.model_input.text().strip(),
+                self.date_input.text().strip(),
+                self.vehicle_type_input.text().strip(),
+                self.status_input.text().strip()
+            )
+
+            # Create a graph using the fetched data
+            graph = Graph(results)
+            graph_pixmap = graph.create_graph()
+
+            # Create a new window to display the graph
+            self.graph_screen = GraphScreen(graph_pixmap)
+            self.graph_screen.show()
+
+        except Exception as e:
+            error_label = QLabel(f"Error: {e}")
+            self.layout().addWidget(error_label)
