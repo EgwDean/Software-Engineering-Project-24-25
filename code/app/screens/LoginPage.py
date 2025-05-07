@@ -177,7 +177,6 @@ class LoginPage(QWidget):
             # Handle the login type
             if login_type == 'user':
                 print("Logged in as a user.")
-<<<<<<< HEAD
                 user = SU.StandardUser(username)
                 self.login_successful.emit(user)
                 return user
@@ -186,20 +185,6 @@ class LoginPage(QWidget):
                 user = AD.Admin(username)
                 self.login_successful.emit(user)
                 return user
-=======
-                self.error_label.setText("")  # Clear any error messages
-                self.map_screen = MapScreen(SU.StandardUser(username))  # Pass the user object to MapScreen
-                self.map_screen.show()  # Show the MapScreen
-                self.close()  # Close the LoginPage
-                return SU.StandardUser(username)
-            elif login_type == 'admin':
-                print("Logged in as an admin.")
-                self.error_label.setText("")  # Clear any error messages
-                self.admin_window = MenuScreen(AD.Admin(username))
-                self.admin_window.show()
-                self.close()  # Close the LoginPage
-                return AD.Admin(username)
->>>>>>> main
             else:
                 self.error_label.setText("Invalid credentials!")
                 return None  
