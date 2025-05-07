@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QComboBox, QMessageBox
+    QDialog, QVBoxLayout, QLabel, QTextEdit, QPushButton, QHBoxLayout, QMessageBox
 )
 from PyQt5.QtCore import Qt
 import services.Database as DB
@@ -10,6 +10,7 @@ class ReviewPage(QDialog):
         super().__init__(parent)
         self.user = user
         self.listing_id = listing_id
+        self.rating = 0
         self.setWindowTitle("Submit Review")
         self.setFixedSize(400, 300)
         self._setup_ui()
@@ -17,22 +18,44 @@ class ReviewPage(QDialog):
     def _setup_ui(self):
         layout = QVBoxLayout(self)
 
-        layout.addWidget(QLabel("Rating (1 to 5):"))
-        self.stars_combo = QComboBox()
-        self.stars_combo.addItems([str(i) for i in range(1, 6)])
-        layout.addWidget(self.stars_combo)
+        # Rating with clickable stars
+        layout.addWidget(QLabel("Rating:"))
+        stars_layout = QHBoxLayout()
+        self.star_buttons = []
+        for i in range(1, 6):
+            btn = QPushButton('☆')
+            btn.setFlat(True)
+            btn.setStyleSheet(
+                "QPushButton { font-size: 24px; color: #FFD700; border: none; }"
+                "QPushButton:hover { color: #FFC107; }"
+            )
+            btn.setFixedSize(40, 40)
+            btn.clicked.connect(lambda _, s=i: self._set_rating(s))
+            self.star_buttons.append(btn)
+            stars_layout.addWidget(btn)
+        layout.addLayout(stars_layout)
 
+        # Comment
         layout.addWidget(QLabel("Comment (max 250 chars):"))
         self.comment_edit = QTextEdit()
         self.comment_edit.setPlaceholderText("Write your review here...")
         self.comment_edit.setFixedHeight(100)
         layout.addWidget(self.comment_edit)
 
+        # Submit
         submit_btn = QPushButton("Submit")
         submit_btn.clicked.connect(self.submit_review)
         layout.addWidget(submit_btn, alignment=Qt.AlignCenter)
 
+    def _set_rating(self, stars):
+        self.rating = stars
+        for idx, btn in enumerate(self.star_buttons, start=1):
+            btn.setText('★' if idx <= stars else '☆')
+
     def submit_review(self):
+        if self.rating == 0:
+            QMessageBox.warning(self, "Error", "Please select a star rating.")
+            return
         comment = self.comment_edit.toPlainText().strip()
         if len(comment) > 250:
             QMessageBox.warning(self, "Error", "Comment exceeds 250 characters.")
@@ -54,7 +77,7 @@ class ReviewPage(QDialog):
             cursor.execute(insert, (
                 self.user.username,
                 self.listing_id,
-                int(self.stars_combo.currentText()),
+                self.rating,
                 comment,
                 datetime.today().strftime('%Y-%m-%d')
             ))

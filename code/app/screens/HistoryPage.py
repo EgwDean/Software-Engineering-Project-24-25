@@ -19,8 +19,8 @@ class HistoryPage(QWidget):
         self.setStyleSheet("background-color: #f5f5f5;")
         self.showMaximized()
 
-        # logo path
-        self.logo_path = Path(__file__).parent.parent.parent / 'assets' / 'logo_1.png'
+        # assets directory path
+        self.assets_dir = Path(__file__).parent.parent.parent / 'assets'
         self._init_ui()
 
     def _init_ui(self):
@@ -29,9 +29,9 @@ class HistoryPage(QWidget):
 
         # Back arrow button
         back_btn = QPushButton("←")
-        back_btn.setFixedSize(40, 40)
+        back_btn.setFixedSize(60, 60)
         back_btn.setStyleSheet(
-            "QPushButton { background: transparent; border: none; color: #f44336; font-size: 40px; }"
+            "QPushButton { background: transparent; border: none; color: #f44336; font-size: 36px; }"
             "QPushButton:hover { color: #d32f2f; }"
         )
         back_btn.clicked.connect(self.back_requested.emit)
@@ -44,7 +44,7 @@ class HistoryPage(QWidget):
         )
         main_layout.addWidget(title)
 
-        # Scroll area for rental boxes
+        # Scroll area
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
         container = QWidget()
@@ -117,19 +117,24 @@ class HistoryPage(QWidget):
         box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         hbox = QHBoxLayout(box)
 
-        # Image
+        # Vehicle image based on listing id
         img = QLabel()
-        pix = QPixmap(str(self.logo_path)).scaled(100,100,Qt.KeepAspectRatio,Qt.SmoothTransformation)
+        img.setFixedSize(100, 100)
+        img.setScaledContents(True)
+        img_file = self.assets_dir / f"img_{rental['id']}_1.jpg"
+        if img_file.exists():
+            pix = QPixmap(str(img_file))
+        else:
+            pix = QPixmap(str(self.assets_dir / 'logo_1.png'))
         img.setPixmap(pix)
-        img.setFixedSize(100,100)
         hbox.addWidget(img)
 
-        # Info
-        info = QVBoxLayout()
-        info.addWidget(QLabel(f"<b>{rental['brand']} {rental['model']} ({rental['year']})</b>"))
-        info.addWidget(QLabel(f"<i>Rented on: {rental['from_date']}</i>"))
-        info.addWidget(QLabel(f"<i>Duration: {rental['number_of_days']} days</i>"))
-        hbox.addLayout(info)
+        # Info section
+        info_layout = QVBoxLayout()
+        info_layout.addWidget(QLabel(f"<b>{rental['brand']} {rental['model']} ({rental['year']})</b>"))
+        info_layout.addWidget(QLabel(f"<i>Rented on: {rental['from_date']}</i>"))
+        info_layout.addWidget(QLabel(f"<i>Duration: {rental['number_of_days']} days</i>"))
+        hbox.addLayout(info_layout)
 
         # Buttons
         btn_layout = QVBoxLayout()
@@ -139,8 +144,7 @@ class HistoryPage(QWidget):
             " border-radius: 5px; font-weight: bold; border: none; }"
             "QPushButton:hover { background-color: #45a049; }"
         )
-        btn_review.setFixedWidth(120)
-        btn_review.clicked.connect(lambda _,r=rental: self._open_review(r))
+        btn_review.clicked.connect(lambda _, r=rental: self._open_review(r))
         btn_layout.addWidget(btn_review)
 
         btn_report = QPushButton("Report Issue")
@@ -149,11 +153,10 @@ class HistoryPage(QWidget):
             " border-radius: 5px; font-weight: bold; border: none; }"
             "QPushButton:hover { background-color: #e53935; }"
         )
-        btn_report.setFixedWidth(120)
-        btn_report.clicked.connect(lambda _,r=rental: self._open_report(r))
+        btn_report.clicked.connect(lambda _, r=rental: self._open_report(r))
         btn_layout.addWidget(btn_report)
 
-        hbox.addLayout(btn_layout)
+        hbox.addLayout(btn_layout)  
         return box
 
     def _open_review(self, rental):
