@@ -8,6 +8,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGraphicsDropShadowEffect
 from pathlib import Path
+from screens.MapScreen import MapScreen  # Import the MapScreen class
+import entities.StandardUser as SU  # Import the StandardUser entity
 
 
 class SignUpPage(QWidget):
@@ -208,6 +210,13 @@ class SignUpPage(QWidget):
             # Success message
             self.error_label.setStyleSheet("color: green; font-size: 12px; border: none;")
             self.error_label.setText("Account created successfully!")
+
+            # Open the MapScreen
+            self.map_screen = MapScreen(SU.StandardUser(username))  # Pass the user object to MapScreen
+            self.map_screen.show()  # Show the MapScreen
+
+            # Close the SignUpPage window
+            self.close()
 
         except Exception as e:
             print(f"An error occurred during sign-up: {e}")

@@ -4,8 +4,12 @@ import entities.Admin as AD
 import sys
 from PyQt5.QtWidgets import QApplication
 from screens.LoginPage import LoginPage
+<<<<<<< HEAD
 from screens.HistoryPage import HistoryPage  # Import the new screen
 
+=======
+# Main function to start the application
+>>>>>>> main
 def main():
     app = QApplication(sys.argv)
 

@@ -11,6 +11,8 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsDropShadowEffect
 from screens.SignUpPage import SignUpPage  # Import the SignUpPage class
+from screens.MenuScreen import MenuScreen  # Import the MenuScreen class
+from screens.MapScreen import MapScreen  # Import the MapScreen class
 
 
 class LoginPage(QWidget):
@@ -22,16 +24,6 @@ class LoginPage(QWidget):
 
         # Initialize database connection
         self.db_connection = None
-        self.init_db_connection()
-
-        # Hardcoded logo path
-        logo_path = Path(__file__).parent.parent.parent / 'assets' / 'logo_1.png'
-
-        if not logo_path.exists():
-            raise FileNotFoundError(f"Logo file not found at {logo_path}")
-
-        # Convert Path object to string
-        logo_path_str = str(logo_path)
 
         # Main layout
         main_layout = QVBoxLayout()
@@ -50,12 +42,23 @@ class LoginPage(QWidget):
         frame_layout = QVBoxLayout()
         frame_layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
 
-        # Add shadow effect to the frame
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(15)
-        shadow.setOffset(0, 4)
-        shadow.setColor(Qt.black)
-        frame.setGraphicsEffect(shadow)
+        # Error message label (initialize before calling init_db_connection)
+        self.error_label = QLabel("")
+        self.error_label.setStyleSheet("color: red; font-size: 12px; border: none;")  # No border
+        self.error_label.setAlignment(Qt.AlignCenter)
+        frame_layout.addWidget(self.error_label)
+
+        # Call init_db_connection after initializing error_label
+        self.init_db_connection()
+
+        # Hardcoded logo path
+        logo_path = Path(__file__).parent.parent.parent / 'assets' / 'logo_1.png'
+
+        if not logo_path.exists():
+            raise FileNotFoundError(f"Logo file not found at {logo_path}")
+
+        # Convert Path object to string
+        logo_path_str = str(logo_path)
 
         # Logo
         logo_label = QLabel()
@@ -79,12 +82,6 @@ class LoginPage(QWidget):
         self.password_input.setStyleSheet("padding: 8px; font-size: 14px;")
         self.password_input.textChanged.connect(self.check_fields)  # Connect to check_fields
         frame_layout.addWidget(self.password_input)
-
-        # Error message label
-        self.error_label = QLabel("")
-        self.error_label.setStyleSheet("color: red; font-size: 12px; border: none;")  # No border
-        self.error_label.setAlignment(Qt.AlignCenter)
-        frame_layout.addWidget(self.error_label)
 
         # Buttons
         button_layout = QHBoxLayout()
@@ -147,8 +144,10 @@ class LoginPage(QWidget):
             self.db_connection = db.connect()
 
             if self.db_connection is None:
+                self.error_label.setText("Failed to connect to the database.")
                 print("Failed to connect to the database.")
         except Exception as e:
+            self.error_label.setText("An error occurred while connecting to the database.")
             print(f"An error occurred while connecting to the database: {e}")
 
     def login(self):
@@ -162,7 +161,7 @@ class LoginPage(QWidget):
 
         try:
             if self.db_connection is None:
-                print("No database connection available.")
+                self.error_label.setText("No database connection available.")
                 return None
 
             # Call the login stored procedure
@@ -178,6 +177,7 @@ class LoginPage(QWidget):
             # Handle the login type
             if login_type == 'user':
                 print("Logged in as a user.")
+<<<<<<< HEAD
                 user = SU.StandardUser(username)
                 self.login_successful.emit(user)
                 return user
@@ -186,11 +186,26 @@ class LoginPage(QWidget):
                 user = AD.Admin(username)
                 self.login_successful.emit(user)
                 return user
+=======
+                self.error_label.setText("")  # Clear any error messages
+                self.map_screen = MapScreen(SU.StandardUser(username))  # Pass the user object to MapScreen
+                self.map_screen.show()  # Show the MapScreen
+                self.close()  # Close the LoginPage
+                return SU.StandardUser(username)
+            elif login_type == 'admin':
+                print("Logged in as an admin.")
+                self.error_label.setText("")  # Clear any error messages
+                self.admin_window = MenuScreen(AD.Admin(username))
+                self.admin_window.show()
+                self.close()  # Close the LoginPage
+                return AD.Admin(username)
+>>>>>>> main
             else:
                 self.error_label.setText("Invalid credentials!")
                 return None  
 
         except Exception as e:
+            self.error_label.setText("An error occurred during login.")
             print(f"An error occurred: {e}")
             return None
 
