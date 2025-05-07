@@ -13,14 +13,23 @@ def main():
     login_page.show()
 
     def handle_login_success(user):
-        login_page.close()
+    # Hide (don’t close) the login window so we can show it again later
+        login_page.hide()
+
         if isinstance(user, SU.StandardUser):
             print(f"Welcome, {user.username}! You are logged in as a Standard User.")
             history = HistoryPage(user)
+
+        # Connect the back_requested signal to close history & re-show login
+            history.back_requested.connect(lambda: (
+            history.close(),
+            login_page.show()
+                ))
+
             history.show()
+
         elif isinstance(user, AD.Admin):
             print(f"Welcome, {user.username}! You are logged in as an Admin.")
-            # You can open an Admin page here if needed
 
     login_page.login_successful.connect(handle_login_success)
 
