@@ -30,8 +30,8 @@ class HistoryPage(QWidget):
         back_btn = QPushButton("←")
         back_btn.setFixedSize(60, 60)
         back_btn.setStyleSheet(
-            "QPushButton { background: transparent; border: none; color: #f44336; font-size: 36px; }"
-            "QPushButton:hover { color: #d32f2f; }"
+            "QPushButton { background: transparent; border: none; color: skyblue; font-size: 37px; }"
+            "QPushButton:hover { color: deepskyblue; }"
         )
         back_btn.clicked.connect(self.back_requested.emit)
         main_layout.addWidget(back_btn, alignment=Qt.AlignLeft)
@@ -180,7 +180,7 @@ class HistoryPage(QWidget):
         img = QLabel()
         img.setFixedSize(100, 100)
         img.setScaledContents(True)
-        img_file = self.assets_dir / f"img_{rental['id']}_1.jpg"
+        img_file = self.assets_dir / "images" / f"img_{rental['id']}_1.jpg"
         pix = QPixmap(str(img_file)) if img_file.exists() else QPixmap(str(self.assets_dir / 'logo_1.png'))
         img.setPixmap(pix)
         hbox.addWidget(img)
