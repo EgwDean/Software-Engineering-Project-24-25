@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from pathlib import Path
+from screens.ListingsScreen import ListingsScreen
 
 
 class MapScreen(QWidget):
@@ -84,17 +85,26 @@ class MapScreen(QWidget):
         nav_menu = QVBoxLayout()
         nav_menu.setAlignment(Qt.AlignTop)
 
+        # Only change: replace "TODO 1" with "Listings"
         for i in range(5):
-            button = QPushButton(f"TODO {i + 1}")
+            label = "VIEW ALL LISTINGS" if i == 0 else f"TODO {i + 1}"
+            button = QPushButton(label)
             button.setStyleSheet("""
-                padding: 10px;
-                font-size: 14px;
-                background-color: skyblue;
-                border: none;
-                color: white;
-                text-align: left;
+                padding: 8px 2px;                  
+                font-size: 16px;                     
+                background-color: #007BFF;          
+                border: 2px solid #0056b3;          
+                border-radius: 8px;                  
+                color: white;                        
+                text-align: center;                  
+                box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
+                font-weight: bold;                   
             """)
-            button.clicked.connect(self.do_nothing)
+            # If it's the "VIEW ALL LISTINGS" button, connect to open_listings
+            if i == 0:
+                button.clicked.connect(self.open_listings)
+            else:
+                button.clicked.connect(self.do_nothing)
             nav_menu.addWidget(button)
 
         nav_menu.addStretch()
@@ -143,3 +153,8 @@ class MapScreen(QWidget):
 
     def do_nothing(self, event):
         pass
+
+    def open_listings(self, event=None):
+        # Create and show the ListingsScreen window
+        self.listings_window = ListingsScreen(self.user)
+        self.listings_window.show()
