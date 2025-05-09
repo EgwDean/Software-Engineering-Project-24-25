@@ -68,7 +68,7 @@ CREATE TABLE rents (
     from_date DATE NOT NULL,
     number_of_days INT NOT NULL,
 	id_of_listing INT NOT NULL,
-    PRIMARY KEY(user_who_rents, id_of_listing),
+    PRIMARY KEY(user_who_rents, from_date, id_of_listing),
 	FOREIGN KEY (user_who_rents) REFERENCES user(username),
 	FOREIGN KEY (id_of_listing) REFERENCES vehicle_listing(id)   
 );
