@@ -34,8 +34,6 @@ class MapScreen(QWidget):
         logo_label = QLabel()
         pixmap = QPixmap(str(logo_path))
         logo_label.setPixmap(pixmap.scaledToWidth(70, Qt.SmoothTransformation))
-        logo_label.setCursor(Qt.PointingHandCursor)
-        logo_label.mousePressEvent = self.reload_page
         top_menu_layout.addWidget(logo_label)
 
         # Search bar
@@ -57,8 +55,6 @@ class MapScreen(QWidget):
         filter_label = QLabel()
         filter_pixmap = QPixmap(str(filter_icon_path))
         filter_label.setPixmap(filter_pixmap.scaledToWidth(30, Qt.SmoothTransformation))
-        filter_label.setCursor(Qt.PointingHandCursor)
-        filter_label.mousePressEvent = self.do_nothing
         top_menu_layout.addWidget(filter_label)
 
         # User icon
@@ -68,8 +64,6 @@ class MapScreen(QWidget):
         user_label = QLabel()
         user_pixmap = QPixmap(str(user_icon_path))
         user_label.setPixmap(user_pixmap.scaledToWidth(30, Qt.SmoothTransformation))
-        user_label.setCursor(Qt.PointingHandCursor)
-        user_label.mousePressEvent = self.do_nothing
         top_menu_layout.addWidget(user_label)
 
         top_menu_frame = QFrame()
@@ -95,7 +89,6 @@ class MapScreen(QWidget):
                 color: white;
                 text-align: left;
             """)
-            button.clicked.connect(self.do_nothing)
             nav_menu.addWidget(button)
 
         nav_menu.addStretch()
@@ -107,7 +100,8 @@ class MapScreen(QWidget):
         content_layout.addWidget(nav_menu_frame)
 
         # Map widget
-        self.map_widget = MapWidget()
+        user_coords = self.get_user_coordinates()
+        self.map_widget = MapWidget(latitude=user_coords[0], longitude=user_coords[1])
         content_layout.addWidget(self.map_widget)
 
         # Fetch listings and place pins
@@ -116,6 +110,40 @@ class MapScreen(QWidget):
 
         main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
+
+    def get_user_coordinates(self):
+        """Fetch the user's address and convert it to coordinates."""
+        try:
+            db = DB.Database()
+            connection = db.connect()
+
+            if connection is None:
+                print("Failed to connect to the database.")
+                return 51.505, -0.09  # Default to London
+
+            cursor = connection.cursor()
+            query = """
+                SELECT country, city, street, number
+                FROM address
+                WHERE username_address = %s
+            """
+            cursor.execute(query, (self.user.username,))
+            result = cursor.fetchone()
+
+            if result:
+                country, city, street, number = result
+                address = f"{street} {number}, {city}, {country}"
+                coords = self.get_coordinates_from_address_string(address)
+                if coords:
+                    return coords
+
+            cursor.close()
+            connection.close()
+
+        except Exception as e:
+            print(f"An error occurred while fetching user coordinates: {e}")
+
+        return 51.505, -0.09  # Default to London
 
     def fetch_listings(self):
         """Fetch all listings from the database and create VehicleListing instances."""
@@ -170,12 +198,6 @@ class MapScreen(QWidget):
         except Exception as e:
             print(f"Geocoding error: {e}")
         return None
-
-    def reload_page(self, event):
-        """Reload the page."""
-        self.close()
-        self.__init__(self.user)
-        self.show()
 
     def do_nothing(self, event):
         """Placeholder for unimplemented functionality."""
