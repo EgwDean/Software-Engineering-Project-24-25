@@ -105,6 +105,12 @@ class SignUpPage(QWidget):
         self.street_input.setStyleSheet("padding: 8px; font-size: 14px;")
         frame_layout.addWidget(self.street_input)
 
+        # Number field
+        self.number_input = QLineEdit()
+        self.number_input.setPlaceholderText("Number")
+        self.number_input.setStyleSheet("padding: 8px; font-size: 14px;")
+        frame_layout.addWidget(self.number_input)
+
         # Error message label
         self.error_label = QLabel("")
         self.error_label.setStyleSheet("color: red; font-size: 12px; border: none;")
@@ -173,8 +179,9 @@ class SignUpPage(QWidget):
         country = self.country_input.text().strip()
         city = self.city_input.text().strip()
         street = self.street_input.text().strip()
+        number = self.number_input.text().strip()
 
-        if not all([username, password, phone, email, country, city, street]):
+        if not all([username, password, phone, email, country, city, street, number]):
             self.error_label.setText("All fields are required!")
             return
 
@@ -196,10 +203,10 @@ class SignUpPage(QWidget):
 
             # Insert address into the address table
             address_query = """
-                INSERT INTO address (username_address, country, city, street)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO address (username_address, country, city, street, number)
+                VALUES (%s, %s, %s, %s, %s)
             """
-            cursor.execute(address_query, (username, country, city, street))
+            cursor.execute(address_query, (username, country, city, street, number))
 
             # Commit the transaction
             self.db_connection.commit()

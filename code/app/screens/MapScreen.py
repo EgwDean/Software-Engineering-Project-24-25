@@ -1,27 +1,27 @@
 from PyQt5.QtWidgets import (
-    QWidget, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFrame
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWebEngineWidgets import QWebEngineView
 from pathlib import Path
+import requests
+from services.Map import MapWidget
+from services.Pin import Pin
 
 
 class MapScreen(QWidget):
-    def __init__(self, user):
+    def __init__(self, user, listings=None):
         super().__init__()
         self.user = user
+        self.listings = listings or []
         self.setWindowTitle("Map Screen")
         self.setStyleSheet("background-color: #f0f0f0;")
-
-        # Make the window maximized
         self.showMaximized()
 
-        # Main layout
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Top menu layout
+        # === Top menu ===
         top_menu_layout = QHBoxLayout()
         top_menu_layout.setAlignment(Qt.AlignLeft)
 
@@ -70,13 +70,12 @@ class MapScreen(QWidget):
         user_label.mousePressEvent = self.do_nothing
         top_menu_layout.addWidget(user_label)
 
-        # Top menu frame
         top_menu_frame = QFrame()
         top_menu_frame.setLayout(top_menu_layout)
         top_menu_frame.setStyleSheet("background-color: skyblue; padding: 10px;")
         main_layout.addWidget(top_menu_frame)
 
-        # Content layout
+        # === Content layout ===
         content_layout = QHBoxLayout()
         content_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -105,40 +104,44 @@ class MapScreen(QWidget):
         nav_menu_frame.setStyleSheet("background-color: skyblue;")
         content_layout.addWidget(nav_menu_frame)
 
-        # OpenStreetMap View
-        map_view = QWebEngineView()
-        map_html = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8" />
-            <title>Leaflet Map</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>html, body, #map { height: 100%; margin: 0; }</style>
-            <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-        </head>
-        <body>
-            <div id="map"></div>
-            <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-            <script>
-                var map = L.map('map').setView([51.505, -0.09], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
-            </script>
-        </body>
-        </html>
-        """
-        map_view.setHtml(map_html)
-        content_layout.addWidget(map_view)
+        # Map widget
+        latitude, longitude = self.get_coordinates_from_address(self.user)
+        self.map_widget = MapWidget(latitude=latitude, longitude=longitude)
+        content_layout.addWidget(self.map_widget)
 
-        # Add to main layout
+        # Add pins for listings
+        for listing in self.listings:
+            listing_address = f"{listing.user.street}, {listing.user.city}, {listing.user.country}"
+            coords = self.get_coordinates_from_address_string(listing_address)
+            if coords:
+                pin = Pin(latitude=coords[0], longitude=coords[1], title=listing.title)
+                self.map_widget.place(pin)
+
         main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
 
+    def get_coordinates_from_address(self, user):
+        address = f"{user.street}, {user.city}, {user.country}"
+        return self.get_coordinates_from_address_string(address)
+
+    def get_coordinates_from_address_string(self, address):
+        try:
+            url = "https://nominatim.openstreetmap.org/search"
+            params = {"q": address, "format": "json"}
+            headers = {"User-Agent": "PyQtMapApp"}
+            response = requests.get(url, params=params, headers=headers)
+            data = response.json()
+            if data:
+                lat = float(data[0]["lat"])
+                lon = float(data[0]["lon"])
+                return lat, lon
+        except Exception as e:
+            print(f"Geocoding error: {e}")
+        return 51.505, -0.09  # fallback to London
+
     def reload_page(self, event):
         self.close()
-        self.__init__(self.user)
+        self.__init__(self.user, self.listings)
         self.show()
 
     def do_nothing(self, event):
