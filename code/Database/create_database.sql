@@ -33,6 +33,7 @@ CREATE TABLE address (
     country VARCHAR(50) NOT NULL,
     city VARCHAR(50) NOT NULL,
     street VARCHAR(50) NOT NULL,
+    number INT NOT NULL,
     FOREIGN KEY (username_address) REFERENCES user(username)
 );
 

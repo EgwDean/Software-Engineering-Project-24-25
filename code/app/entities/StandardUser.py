@@ -12,6 +12,7 @@ class StandardUser:
         self.country = None
         self.city = None
         self.street = None
+        self.number = None
 
         # Fetch user data from the database
         self.fetch_user_data()
@@ -43,12 +44,12 @@ class StandardUser:
                 return
 
             # Query the address table
-            address_query = "SELECT country, city, street FROM address WHERE username_address = %s"
+            address_query = "SELECT country, city, street, number FROM address WHERE username_address = %s"
             cursor.execute(address_query, (self.username,))
             address_result = cursor.fetchone()
 
             if address_result:
-                self.country, self.city, self.street = address_result
+                self.country, self.city, self.street, self.number = address_result
                 print(f"Address data fetched for {self.username}: {address_result}")
             else:
                 print(f"No address found for username: {self.username}")
