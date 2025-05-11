@@ -7,13 +7,15 @@ from pathlib import Path
 import requests
 from services.Map import MapWidget
 from services.Pin import Pin
+from entities.VehicleListing import VehicleListing
+import services.Database as DB
 
 
 class MapScreen(QWidget):
-    def __init__(self, user, listings=None):
+    def __init__(self, user):
         super().__init__()
         self.user = user
-        self.listings = listings or []
+        self.listings = []  # Store all VehicleListing instances
         self.setWindowTitle("Map Screen")
         self.setStyleSheet("background-color: #f0f0f0;")
         self.showMaximized()
@@ -105,26 +107,56 @@ class MapScreen(QWidget):
         content_layout.addWidget(nav_menu_frame)
 
         # Map widget
-        latitude, longitude = self.get_coordinates_from_address(self.user)
-        self.map_widget = MapWidget(latitude=latitude, longitude=longitude)
+        self.map_widget = MapWidget()
         content_layout.addWidget(self.map_widget)
 
-        # Add pins for listings
-        for listing in self.listings:
-            listing_address = f"{listing.user.street}, {listing.user.city}, {listing.user.country}"
-            coords = self.get_coordinates_from_address_string(listing_address)
-            if coords:
-                pin = Pin(latitude=coords[0], longitude=coords[1], title=listing.title)
-                self.map_widget.place(pin)
+        # Fetch listings and place pins
+        self.fetch_listings()
+        self.place_pins()
 
         main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
 
-    def get_coordinates_from_address(self, user):
-        address = f"{user.street}, {user.city}, {user.country}"
-        return self.get_coordinates_from_address_string(address)
+    def fetch_listings(self):
+        """Fetch all listings from the database and create VehicleListing instances."""
+        try:
+            db = DB.Database()
+            connection = db.connect()
+
+            if connection is None:
+                print("Failed to connect to the database.")
+                return
+
+            cursor = connection.cursor()
+            query = "SELECT id FROM vehicle_listing"
+            cursor.execute(query)
+            results = cursor.fetchall()
+
+            for row in results:
+                listing_id = row[0]
+                listing = VehicleListing(listing_id)
+                self.listings.append(listing)
+
+            cursor.close()
+            connection.close()
+
+            print(f"Fetched {len(self.listings)} listings from the database.")
+
+        except Exception as e:
+            print(f"An error occurred while fetching listings: {e}")
+
+    def place_pins(self):
+        """Convert addresses to coordinates and place pins on the map."""
+        for listing in self.listings:
+            if listing.country and listing.city and listing.street and listing.number:
+                address = f"{listing.street} {listing.number}, {listing.city}, {listing.country}"
+                coords = self.get_coordinates_from_address_string(address)
+                if coords:
+                    pin = Pin(latitude=coords[0], longitude=coords[1], title=f"Listing ID: {listing.id}")
+                    self.map_widget.place(pin)
 
     def get_coordinates_from_address_string(self, address):
+        """Convert an address string to latitude and longitude using a geocoding API."""
         try:
             url = "https://nominatim.openstreetmap.org/search"
             params = {"q": address, "format": "json"}
@@ -137,12 +169,14 @@ class MapScreen(QWidget):
                 return lat, lon
         except Exception as e:
             print(f"Geocoding error: {e}")
-        return 51.505, -0.09  # fallback to London
+        return None
 
     def reload_page(self, event):
+        """Reload the page."""
         self.close()
-        self.__init__(self.user, self.listings)
+        self.__init__(self.user)
         self.show()
 
     def do_nothing(self, event):
+        """Placeholder for unimplemented functionality."""
         pass
