@@ -1,11 +1,11 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame, QToolButton
 )
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QIcon
 from pathlib import Path
 import requests
-from services.Map import MapWidget
+from services.Map import Map
 from services.Pin import Pin
 from entities.VehicleListing import VehicleListing
 import services.Database as DB
@@ -50,15 +50,15 @@ class MapScreen(QWidget):
         self.search_bar.returnPressed.connect(self.perform_search)
         top_menu_layout.addWidget(self.search_bar)
 
-        # Search button
-        search_button = QPushButton("Search")
+        # Search button with icon
+        search_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-search-30.png'
+        if not search_icon_path.exists():
+            raise FileNotFoundError(f"Search icon file not found at {search_icon_path}")
+        search_button = QToolButton()
+        search_button.setIcon(QIcon(str(search_icon_path)))  # Wrap QPixmap in QIcon
         search_button.setStyleSheet("""
-            padding: 8px;
-            font-size: 14px;
-            background-color: skyblue;
-            color: white;
             border: none;
-            border-radius: 5px;
+            background-color: transparent;
         """)
         search_button.clicked.connect(self.perform_search)
         top_menu_layout.addWidget(search_button)
@@ -67,19 +67,25 @@ class MapScreen(QWidget):
         filter_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-filter-30.png'
         if not filter_icon_path.exists():
             raise FileNotFoundError(f"Filter icon file not found at {filter_icon_path}")
-        filter_label = QLabel()
-        filter_pixmap = QPixmap(str(filter_icon_path))
-        filter_label.setPixmap(filter_pixmap.scaledToWidth(30, Qt.SmoothTransformation))
-        top_menu_layout.addWidget(filter_label)
+        filter_button = QToolButton()
+        filter_button.setIcon(QIcon(str(filter_icon_path)))  # Wrap QPixmap in QIcon
+        filter_button.setStyleSheet("""
+            border: none;
+            background-color: transparent;
+        """)
+        top_menu_layout.addWidget(filter_button)
 
         # User icon
         user_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-user-30.png'
         if not user_icon_path.exists():
             raise FileNotFoundError(f"User icon file not found at {user_icon_path}")
-        user_label = QLabel()
-        user_pixmap = QPixmap(str(user_icon_path))
-        user_label.setPixmap(user_pixmap.scaledToWidth(30, Qt.SmoothTransformation))
-        top_menu_layout.addWidget(user_label)
+        user_button = QToolButton()
+        user_button.setIcon(QIcon(str(user_icon_path)))  # Wrap QPixmap in QIcon
+        user_button.setStyleSheet("""
+            border: none;
+            background-color: transparent;
+        """)
+        top_menu_layout.addWidget(user_button)
 
         top_menu_frame = QFrame()
         top_menu_frame.setLayout(top_menu_layout)
@@ -116,7 +122,7 @@ class MapScreen(QWidget):
 
         # Map widget
         user_coords = self.get_user_coordinates()
-        self.map_widget = MapWidget(latitude=user_coords[0], longitude=user_coords[1])
+        self.map_widget = Map(latitude=user_coords[0], longitude=user_coords[1])
         content_layout.addWidget(self.map_widget)
 
         # Fetch listings and place pins
@@ -222,10 +228,14 @@ class MapScreen(QWidget):
         return None
 
     def perform_search(self):
-        """Perform a search using the search bar."""
+        """Perform a search using the search bar and center the map."""
         location = self.search_bar.text().strip()
         if location:
-            self.search.search(location)
+            coords = self.get_coordinates_from_address_string(location)
+            if coords:
+                self.map_widget.center_map(coords[0], coords[1])
+            else:
+                print(f"Could not find coordinates for location: {location}")
         else:
             print("Search bar is empty. Please enter a location.")
 
