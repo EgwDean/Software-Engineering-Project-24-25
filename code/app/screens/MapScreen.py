@@ -10,6 +10,7 @@ from services.Pin import Pin
 from entities.VehicleListing import VehicleListing
 import services.Database as DB
 from services.Search import Search
+from services.Filter import Filter  # Import the Filter class
 
 
 class MapScreen(QWidget):
@@ -73,6 +74,7 @@ class MapScreen(QWidget):
             border: none;
             background-color: transparent;
         """)
+        filter_button.clicked.connect(self.open_filter_popup)  # Connect to the filter popup
         top_menu_layout.addWidget(filter_button)
 
         # User icon
@@ -180,7 +182,7 @@ class MapScreen(QWidget):
                 return
 
             cursor = connection.cursor()
-            query = "SELECT id FROM vehicle_listing"
+            query = "SELECT id FROM vehicle_listing WHERE status = 'listed'"
             cursor.execute(query)
             results = cursor.fetchall()
 
@@ -238,6 +240,12 @@ class MapScreen(QWidget):
                 print(f"Could not find coordinates for location: {location}")
         else:
             print("Search bar is empty. Please enter a location.")
+
+    def open_filter_popup(self):
+        """Open the filter popup."""
+        print("Opening filter popup.")  # Debug
+        filter_dialog = Filter(self.map_widget, self)
+        filter_dialog.exec_()
 
     def do_nothing(self, event):
         """Placeholder for unimplemented functionality."""
