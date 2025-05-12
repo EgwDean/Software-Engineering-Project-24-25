@@ -5,13 +5,13 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QIcon
 from pathlib import Path
 import requests
+import services.Database as DB
 from services.Map import Map
 from services.Pin import Pin
-from entities.VehicleListing import VehicleListing
-import services.Database as DB
 from services.Search import Search
+from entities.VehicleListing import VehicleListing  # Import the VehicleListing class   
 from services.Filter import Filter  # Import the Filter class
-
+from screens.HistoryPage import HistoryPage  # Import HistoryPage
 
 class MapScreen(QWidget):
     def __init__(self, user):
@@ -74,7 +74,7 @@ class MapScreen(QWidget):
             border: none;
             background-color: transparent;
         """)
-        filter_button.clicked.connect(self.open_filter_popup)  # Connect to the filter popup
+        filter_button.clicked.connect(self.open_filter_popup)
         top_menu_layout.addWidget(filter_button)
 
         # User icon
@@ -82,7 +82,7 @@ class MapScreen(QWidget):
         if not user_icon_path.exists():
             raise FileNotFoundError(f"User icon file not found at {user_icon_path}")
         user_button = QToolButton()
-        user_button.setIcon(QIcon(str(user_icon_path)))  # Wrap QPixmap in QIcon
+        user_button.setIcon(QIcon(str(user_icon_path)))
         user_button.setStyleSheet("""
             border: none;
             background-color: transparent;
@@ -103,7 +103,11 @@ class MapScreen(QWidget):
         nav_menu.setAlignment(Qt.AlignTop)
 
         for i in range(5):
-            button = QPushButton(f"TODO {i + 1}")
+            if i == 4:
+                button = QPushButton("History")
+                button.clicked.connect(self.open_history)
+            else:
+                button = QPushButton(f"TODO {i + 1}")
             button.setStyleSheet("""
                 padding: 10px;
                 font-size: 14px;
@@ -136,6 +140,13 @@ class MapScreen(QWidget):
 
         # Initialize the Search class
         self.search = Search(self.map_widget)
+
+    def open_history(self):
+        """Instantiate and show the HistoryPage."""
+        history_page = HistoryPage(self.user)
+        history_page.back_requested.connect(self.show)
+        self.hide()
+        history_page.show()
 
     def get_user_coordinates(self):
         """Fetch the user's address and convert it to coordinates."""
@@ -202,7 +213,6 @@ class MapScreen(QWidget):
     def place_pins(self):
         """Convert addresses to coordinates and place pins on the map."""
         for listing in self.listings:
-            # Skip listings that belong to the logged-in user
             if listing.name_of_user == self.user.username:
                 continue
 
@@ -243,7 +253,6 @@ class MapScreen(QWidget):
 
     def open_filter_popup(self):
         """Open the filter popup."""
-        print("Opening filter popup.")  # Debug
         filter_dialog = Filter(self.map_widget, self)
         filter_dialog.exec_()
 

@@ -1,6 +1,7 @@
 import services.Database as DB
 import entities.StandardUser as SU
 import entities.Admin as AD
+from PyQt5.QtCore import Qt, pyqtSignal
 from pathlib import Path
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QLineEdit, QPushButton,
@@ -15,6 +16,7 @@ from screens.MapScreen import MapScreen  # Import the MapScreen class
 
 
 class LoginPage(QWidget):
+    login_successful = pyqtSignal(object)
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Login Page")
@@ -175,18 +177,14 @@ class LoginPage(QWidget):
             # Handle the login type
             if login_type == 'user':
                 print("Logged in as a user.")
-                self.error_label.setText("")  # Clear any error messages
-                self.map_screen = MapScreen(SU.StandardUser(username))  # Pass the user object to MapScreen
-                self.map_screen.show()  # Show the MapScreen
-                self.close()  # Close the LoginPage
-                return SU.StandardUser(username)
+                user = SU.StandardUser(username)
+                self.login_successful.emit(user)
+                return user
             elif login_type == 'admin':
                 print("Logged in as an admin.")
-                self.error_label.setText("")  # Clear any error messages
-                self.admin_window = MenuScreen(AD.Admin(username))
-                self.admin_window.show()
-                self.close()  # Close the LoginPage
-                return AD.Admin(username)
+                user = AD.Admin(username)
+                self.login_successful.emit(user)
+                return user
             else:
                 self.error_label.setText("Invalid credentials!")
                 return None  
