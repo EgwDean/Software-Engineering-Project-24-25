@@ -1,6 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QPushButton
 from PyQt5.QtCore import Qt
-from screens.BookPage import BookPage  # Βεβαιώσου ότι το μονοπάτι είναι σωστό
 
 class ListingScreen(QWidget):
     def __init__(self, user, listing_data):
@@ -10,7 +9,7 @@ class ListingScreen(QWidget):
         self.setWindowTitle("Listing Details")
         self.setGeometry(100, 100, 600, 600)
 
-        layout = QVBoxLayout()
+        layout = QGridLayout()
 
         fields = {
             "name_of_user": "Owner",
@@ -26,12 +25,24 @@ class ListingScreen(QWidget):
             "to_date": "Available To"
         }
 
+        row, col = 0, 0
         for key, label_name in fields.items():
             value = listing_data.get(key, "N/A")
-            label = QLabel(f"<b>{label_name}:</b> {value}")
+            # Δημιουργία ετικέτας με τίτλο και τιμή
+            label = QLabel(f"<b>{label_name}:</b> <span style='color: #007bff;'>{value}</span>")
             label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            label.setStyleSheet("font-size: 16px; margin-bottom: 10px;")
-            layout.addWidget(label)
+            label.setStyleSheet("""
+                font-size: 16px;
+                margin-bottom: 10px;
+                text-align: center;
+                font-weight: bold;
+            """)
+
+            layout.addWidget(label, row, col)
+            col += 1
+            if col == 3:
+                col = 0
+                row += 1
 
         # Κουμπί Book Now
         book_button = QPushButton("Book Now")
@@ -43,7 +54,7 @@ class ListingScreen(QWidget):
             font-size: 16px;
         """)
         book_button.clicked.connect(self.open_book_page)
-        layout.addWidget(book_button)
+        layout.addWidget(book_button, row, 0, 1, 3)
 
         self.setLayout(layout)
 
@@ -51,4 +62,3 @@ class ListingScreen(QWidget):
         self.book_page = BookPage(self.user, self.listing_data)
         self.book_page.show()
         self.close()
-

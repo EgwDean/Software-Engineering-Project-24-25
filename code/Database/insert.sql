@@ -10,7 +10,10 @@ VALUES
 ('user7', 'password7', '1234567896', 'user7@example.com', 4000.0, 998822330, NULL),
 ('user8', 'password8', '1234567897', 'user8@example.com', 4500.0, 667788990, NULL),
 ('user9', 'password9', '1234567898', 'user9@example.com', 5000.0, 778899665, NULL),
-('user10', 'password10', '1234567899', 'user10@example.com', 5500.0, 223344556, NULL);
+('user10', 'password10', '1234567899', 'user10@example.com', 5500.0, 223344556, NULL),
+('1', '1', '1111111111', '1@1.com', 5500.0, 223344556, NULL),
+('2', '2', '2222222222', '2@2.com', 5500.0, 223344557, NULL),
+('3', '3', '3333333333', '3@3.com', 5500.0, 223344558, NULL);
 
 -- Εισαγωγή Εγγραφών στον Πίνακα admin
 INSERT INTO admin (username, password)
@@ -46,18 +49,21 @@ VALUES
 (5000);
 
 -- Εισαγωγή Εγγραφών στον Πίνακα address
-INSERT INTO address (username_address, country, city, street)
+INSERT INTO address (username_address, country, city, street, number)
 VALUES
-('user1', 'USA', 'New York', '5th Avenue'),
-('user2', 'UK', 'London', 'Baker Street'),
-('user3', 'Germany', 'Berlin', 'Alexanderplatz'),
-('user4', 'France', 'Paris', 'Champs-Élysées'),
-('user5', 'Italy', 'Rome', 'Via del Corso'),
-('user6', 'Spain', 'Madrid', 'Gran Vía'),
-('user7', 'Canada', 'Toronto', 'Yonge Street'),
-('user8', 'Australia', 'Sydney', 'George Street'),
-('user9', 'Japan', 'Tokyo', 'Shibuya'),
-('user10', 'China', 'Beijing', 'Wangfujing');
+('user1', 'USA', 'New York', '5th Avenue', '10'),
+('user2', 'UK', 'London', 'Baker Street', 10),
+('user3', 'Germany', 'Berlin', 'Alexanderplatz', 10),
+('user4', 'France', 'Paris', 'Champs-Élysées', 10),
+('user5', 'Italy', 'Rome', 'Via del Corso', 10),
+('user6', 'Spain', 'Madrid', 'Gran Vía', 10),
+('user7', 'Canada', 'Toronto', 'Yonge Street', 10),
+('user8', 'Australia', 'Sydney', 'George Street', 10),
+('user9', 'Japan', 'Tokyo', 'Shibuya', 10),
+('user10', 'China', 'Beijing', 'Wangfujing', 10),
+('1', 'Greece', 'Patras', 'Korinthou', 56),
+('2', 'Greece', 'Patras', 'Zaimi', 36),
+('3', 'Greece', 'Patras', 'Aratou', 26);
 
 -- Εισαγωγή Εγγραφών στον Πίνακα pays_subscription
 INSERT INTO pays_subscription (user_name, sub_plan, start_date, end_date)
@@ -85,7 +91,9 @@ VALUES
 ('user7', 110.0, 'Motorcycle', 'Ducati', 'Panigale', '2021', '3000', 'Gasoline', 'High-performance motorcycle', '2025-01-01', '2025-12-31', 'active'),
 ('user8', 150.0, 'Truck', 'Mack', 'Anthem', '2022', '15000', 'Diesel', 'Long-haul truck with powerful engine', '2025-01-01', '2025-12-31', 'listed'),
 ('user9', 100.0, 'Car', 'Audi', 'A4', '2020', '20000', 'Gasoline', 'Compact luxury car for daily use', '2025-01-01', '2025-12-31', 'pending'),
-('user10', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'completed');
+('user10', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'completed'),
+('2', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'listed'),
+('3', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'listed');
 
 -- Εισαγωγή Εγγραφών στον Πίνακα rents
 INSERT INTO rents (user_who_rents, from_date, number_of_days, id_of_listing)

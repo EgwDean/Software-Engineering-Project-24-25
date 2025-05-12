@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QPushButton, QFrame, QHBoxLayout, QScrollArea
+    QWidget, QVBoxLayout, QLabel, QPushButton, QFrame, QHBoxLayout, QScrollArea, QComboBox, QLineEdit, QDateEdit
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDate
 import mysql.connector
-from screens.ListingScreen import ListingScreen  # Για το "View More"
+from screens.ListingScreen import ListingScreen  
 
 class ListingsScreen(QWidget):
     def __init__(self, user):
@@ -16,7 +16,7 @@ class ListingsScreen(QWidget):
 
         main_layout = QVBoxLayout()
 
-        # Top layout
+        # Top layout (for back button and header)
         top_layout = QHBoxLayout()
         top_layout.setAlignment(Qt.AlignLeft)
 
@@ -44,9 +44,85 @@ class ListingsScreen(QWidget):
 
         main_layout.addLayout(top_layout)
 
-        # Listings layout
-        listings_layout = QVBoxLayout()
-        listings = self.fetch_listings_from_db()
+        # Filter toolbar layout
+        filter_layout = QHBoxLayout()
+
+        # Price filter
+        self.price_input = QLineEdit(self)
+        self.price_input.setPlaceholderText("Price per day")
+        filter_layout.addWidget(self.price_input)
+
+        # Vehicle type filter
+        self.vehicle_type_combo = QComboBox(self)
+        self.vehicle_type_combo.addItem("Any")
+        self.vehicle_type_combo.addItem("Car")
+        self.vehicle_type_combo.addItem("Truck")
+        self.vehicle_type_combo.addItem("Motorbike")
+        filter_layout.addWidget(self.vehicle_type_combo)
+
+        # Brand filter
+        self.brand_input = QLineEdit(self)
+        self.brand_input.setPlaceholderText("Brand")
+        filter_layout.addWidget(self.brand_input)
+
+        # Fuel type filter
+        self.fuel_type_combo = QComboBox(self)
+        self.fuel_type_combo.addItem("Any")
+        self.fuel_type_combo.addItem("Gasoline")
+        self.fuel_type_combo.addItem("Diesel")
+        self.fuel_type_combo.addItem("Electric")
+        filter_layout.addWidget(self.fuel_type_combo)
+
+        
+        # Apply filter button
+        apply_filter_button = QPushButton("Apply Filters")
+        apply_filter_button.setStyleSheet("""
+            padding: 12px 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+        """)
+        apply_filter_button.clicked.connect(self.apply_filters)
+        filter_layout.addWidget(apply_filter_button)
+
+        # Reset filter button
+        reset_filter_button = QPushButton("Reset Filters")
+        reset_filter_button.setStyleSheet("""
+            padding: 12px 20px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+        """)
+        reset_filter_button.clicked.connect(self.reset_filters)
+        filter_layout.addWidget(reset_filter_button)
+
+        main_layout.addLayout(filter_layout)
+
+        # Listings layout (the actual listings)
+        self.listings_layout = QVBoxLayout()
+        self.update_listings()  # Initial data fetch
+
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_content = QWidget()
+        scroll_content.setLayout(self.listings_layout)
+        scroll_area.setWidget(scroll_content)
+        main_layout.addWidget(scroll_area)
+
+        self.setLayout(main_layout)
+
+    def update_listings(self, listings=None):
+        # If no listings are passed, fetch them from the DB
+        if listings is None:
+            listings = self.fetch_listings_from_db()
+
+        # Clear current listings
+        for i in range(self.listings_layout.count()):
+            widget = self.listings_layout.itemAt(i).widget()
+            if widget:
+                widget.deleteLater()
 
         if not listings:
             no_listings_label = QLabel("No listings found.")
@@ -56,7 +132,7 @@ class ListingsScreen(QWidget):
                 text-align: center;
                 margin-top: 50px;
             """)
-            listings_layout.addWidget(no_listings_label)
+            self.listings_layout.addWidget(no_listings_label)
         else:
             for listing in listings:
                 listing_frame = QFrame()
@@ -90,24 +166,36 @@ class ListingsScreen(QWidget):
                     border-radius: 5px;
                     font-size: 14px;
                 """)
-
-                # Χρήση lambda για να περάσουμε σωστά το συγκεκριμένο listing
                 view_more_button.clicked.connect(lambda _, l=listing: self.open_listing_screen(l))
                 listing_layout.addWidget(view_more_button)
 
                 listing_frame.setLayout(listing_layout)
-                listings_layout.addWidget(listing_frame)
+                self.listings_layout.addWidget(listing_frame)
 
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_content = QWidget()
-        scroll_content.setLayout(listings_layout)
-        scroll_area.setWidget(scroll_content)
-        main_layout.addWidget(scroll_area)
+    def apply_filters(self):
+        filters = {
+            "price_per_day": self.price_input.text(),
+            "vehicle_type": self.vehicle_type_combo.currentText(),
+            "brand": self.brand_input.text(),
+            "fuel_type": self.fuel_type_combo.currentText(),
+            
+        }
 
-        self.setLayout(main_layout)
+        listings = self.fetch_listings_from_db(filters)
+        self.update_listings(listings)
 
-    def fetch_listings_from_db(self):
+    def reset_filters(self):
+        # Reset all filter fields to their default state
+        self.price_input.clear()
+        self.vehicle_type_combo.setCurrentIndex(0)  # "Any"
+        self.brand_input.clear()
+        self.fuel_type_combo.setCurrentIndex(0)  # "Any"
+        
+
+        # Update listings without filters
+        self.update_listings()
+
+    def fetch_listings_from_db(self, filters=None):
         try:
             conn = mysql.connector.connect(
                 host="localhost",
@@ -116,11 +204,46 @@ class ListingsScreen(QWidget):
                 database="car_rental"
             )
             cursor = conn.cursor(dictionary=True)
-            cursor.execute("SELECT * FROM vehicle_listing")
+
+            # Ξεκινάμε με ένα βασικό query
+            query = "SELECT * FROM vehicle_listing WHERE 1"
+            params = []
+
+            # Ελέγχουμε και προσθέτουμε τα φίλτρα αν υπάρχουν
+            if filters:
+                # Φίλτρο τιμής ανά ημέρα (price_per_day)
+                if filters["price_per_day"]:
+                    try:
+                        price = float(filters["price_per_day"])  # Βεβαιωνόμαστε ότι είναι έγκυρος αριθμός
+                        query += " AND price_per_day <= %s"
+                        params.append(price)
+                    except ValueError:
+                        print("Invalid price input")
+                
+                # Φίλτρο τύπου οχήματος (vehicle_type)
+                if filters["vehicle_type"] != "Any":
+                    query += " AND vehicle_type = %s"
+                    params.append(filters["vehicle_type"])
+                
+                # Φίλτρο μάρκας (brand)
+                if filters["brand"]:
+                    query += " AND brand LIKE %s"
+                    params.append(f"%{filters['brand']}%")
+                
+                # Φίλτρο τύπου καυσίμου (fuel_type)
+                if filters["fuel_type"] != "Any":
+                    query += " AND fuel_type = %s"
+                    params.append(filters["fuel_type"])
+
+            # Εκτέλεση της query με τα params
+            cursor.execute(query, params)
             listings = cursor.fetchall()
+
             cursor.close()
             conn.close()
+
             return listings
+
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return []
@@ -128,7 +251,6 @@ class ListingsScreen(QWidget):
     def open_listing_screen(self, listing_data):
         self.listing_screen = ListingScreen(self.user, listing_data)
         self.listing_screen.show()
-        self.close()
 
     def back_to_map(self):
         from screens.MapScreen import MapScreen  # Lazy import to avoid circular import

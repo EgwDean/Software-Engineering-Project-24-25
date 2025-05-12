@@ -6,6 +6,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from pathlib import Path
 from screens.ListingsScreen import ListingsScreen
+from screens.ProfileScreen import ProfileScreen  # Import ProfileScreen
 
 
 class MapScreen(QWidget):
@@ -60,7 +61,7 @@ class MapScreen(QWidget):
         filter_label.mousePressEvent = self.do_nothing
         top_menu_layout.addWidget(filter_label)
 
-        # User icon
+        # User icon as button
         user_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-user-30.png'
         if not user_icon_path.exists():
             raise FileNotFoundError(f"User icon file not found at {user_icon_path}")
@@ -68,7 +69,7 @@ class MapScreen(QWidget):
         user_pixmap = QPixmap(str(user_icon_path))
         user_label.setPixmap(user_pixmap.scaledToWidth(30, Qt.SmoothTransformation))
         user_label.setCursor(Qt.PointingHandCursor)
-        user_label.mousePressEvent = self.do_nothing
+        user_label.mousePressEvent = self.open_profile_screen  # Link to ProfileScreen
         top_menu_layout.addWidget(user_label)
 
         # Top menu frame
@@ -158,3 +159,9 @@ class MapScreen(QWidget):
         # Create and show the ListingsScreen window
         self.listings_window = ListingsScreen(self.user)
         self.listings_window.show()
+
+    def open_profile_screen(self, event=None):
+        # Create and show the ProfileScreen window
+        self.profile_screen = ProfileScreen(self.user)
+        self.profile_screen.show()
+        self.close()
