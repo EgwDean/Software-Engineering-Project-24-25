@@ -1,27 +1,31 @@
 from PyQt5.QtWidgets import (
-    QWidget, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFrame
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame, QToolButton
 )
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtGui import QPixmap, QIcon
 from pathlib import Path
+import requests
+from services.Map import Map
+from services.Pin import Pin
+from entities.VehicleListing import VehicleListing
+import services.Database as DB
+from services.Search import Search
+from services.Filter import Filter  # Import the Filter class
 
 
 class MapScreen(QWidget):
     def __init__(self, user):
         super().__init__()
         self.user = user
+        self.listings = []  # Store all VehicleListing instances
         self.setWindowTitle("Map Screen")
         self.setStyleSheet("background-color: #f0f0f0;")
-
-        # Make the window maximized
         self.showMaximized()
 
-        # Main layout
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Top menu layout
+        # === Top menu ===
         top_menu_layout = QHBoxLayout()
         top_menu_layout.setAlignment(Qt.AlignLeft)
 
@@ -32,51 +36,65 @@ class MapScreen(QWidget):
         logo_label = QLabel()
         pixmap = QPixmap(str(logo_path))
         logo_label.setPixmap(pixmap.scaledToWidth(70, Qt.SmoothTransformation))
-        logo_label.setCursor(Qt.PointingHandCursor)
-        logo_label.mousePressEvent = self.reload_page
         top_menu_layout.addWidget(logo_label)
 
         # Search bar
-        search_bar = QLineEdit()
-        search_bar.setPlaceholderText("Search...")
-        search_bar.setStyleSheet("""
+        self.search_bar = QLineEdit()
+        self.search_bar.setPlaceholderText("Search...")
+        self.search_bar.setStyleSheet("""
             padding: 8px;
             font-size: 14px;
             border: none;
             background-color: white;
             border-radius: 5px;
         """)
-        top_menu_layout.addWidget(search_bar)
+        self.search_bar.returnPressed.connect(self.perform_search)
+        top_menu_layout.addWidget(self.search_bar)
+
+        # Search button with icon
+        search_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-search-30.png'
+        if not search_icon_path.exists():
+            raise FileNotFoundError(f"Search icon file not found at {search_icon_path}")
+        search_button = QToolButton()
+        search_button.setIcon(QIcon(str(search_icon_path)))  # Wrap QPixmap in QIcon
+        search_button.setStyleSheet("""
+            border: none;
+            background-color: transparent;
+        """)
+        search_button.clicked.connect(self.perform_search)
+        top_menu_layout.addWidget(search_button)
 
         # Filter icon
         filter_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-filter-30.png'
         if not filter_icon_path.exists():
             raise FileNotFoundError(f"Filter icon file not found at {filter_icon_path}")
-        filter_label = QLabel()
-        filter_pixmap = QPixmap(str(filter_icon_path))
-        filter_label.setPixmap(filter_pixmap.scaledToWidth(30, Qt.SmoothTransformation))
-        filter_label.setCursor(Qt.PointingHandCursor)
-        filter_label.mousePressEvent = self.do_nothing
-        top_menu_layout.addWidget(filter_label)
+        filter_button = QToolButton()
+        filter_button.setIcon(QIcon(str(filter_icon_path)))  # Wrap QPixmap in QIcon
+        filter_button.setStyleSheet("""
+            border: none;
+            background-color: transparent;
+        """)
+        filter_button.clicked.connect(self.open_filter_popup)  # Connect to the filter popup
+        top_menu_layout.addWidget(filter_button)
 
         # User icon
         user_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-user-30.png'
         if not user_icon_path.exists():
             raise FileNotFoundError(f"User icon file not found at {user_icon_path}")
-        user_label = QLabel()
-        user_pixmap = QPixmap(str(user_icon_path))
-        user_label.setPixmap(user_pixmap.scaledToWidth(30, Qt.SmoothTransformation))
-        user_label.setCursor(Qt.PointingHandCursor)
-        user_label.mousePressEvent = self.do_nothing
-        top_menu_layout.addWidget(user_label)
+        user_button = QToolButton()
+        user_button.setIcon(QIcon(str(user_icon_path)))  # Wrap QPixmap in QIcon
+        user_button.setStyleSheet("""
+            border: none;
+            background-color: transparent;
+        """)
+        top_menu_layout.addWidget(user_button)
 
-        # Top menu frame
         top_menu_frame = QFrame()
         top_menu_frame.setLayout(top_menu_layout)
         top_menu_frame.setStyleSheet("background-color: skyblue; padding: 10px;")
         main_layout.addWidget(top_menu_frame)
 
-        # Content layout
+        # === Content layout ===
         content_layout = QHBoxLayout()
         content_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -94,7 +112,6 @@ class MapScreen(QWidget):
                 color: white;
                 text-align: left;
             """)
-            button.clicked.connect(self.do_nothing)
             nav_menu.addWidget(button)
 
         nav_menu.addStretch()
@@ -105,41 +122,131 @@ class MapScreen(QWidget):
         nav_menu_frame.setStyleSheet("background-color: skyblue;")
         content_layout.addWidget(nav_menu_frame)
 
-        # OpenStreetMap View
-        map_view = QWebEngineView()
-        map_html = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8" />
-            <title>Leaflet Map</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>html, body, #map { height: 100%; margin: 0; }</style>
-            <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-        </head>
-        <body>
-            <div id="map"></div>
-            <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-            <script>
-                var map = L.map('map').setView([51.505, -0.09], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
-            </script>
-        </body>
-        </html>
-        """
-        map_view.setHtml(map_html)
-        content_layout.addWidget(map_view)
+        # Map widget
+        user_coords = self.get_user_coordinates()
+        self.map_widget = Map(latitude=user_coords[0], longitude=user_coords[1])
+        content_layout.addWidget(self.map_widget)
 
-        # Add to main layout
+        # Fetch listings and place pins
+        self.fetch_listings()
+        self.place_pins()
+
         main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
 
-    def reload_page(self, event):
-        self.close()
-        self.__init__(self.user)
-        self.show()
+        # Initialize the Search class
+        self.search = Search(self.map_widget)
+
+    def get_user_coordinates(self):
+        """Fetch the user's address and convert it to coordinates."""
+        try:
+            db = DB.Database()
+            connection = db.connect()
+
+            if connection is None:
+                print("Failed to connect to the database.")
+                return 51.505, -0.09  # Default to London
+
+            cursor = connection.cursor()
+            query = """
+                SELECT country, city, street, number
+                FROM address
+                WHERE username_address = %s
+            """
+            cursor.execute(query, (self.user.username,))
+            result = cursor.fetchone()
+
+            if result:
+                country, city, street, number = result
+                address = f"{street} {number}, {city}, {country}"
+                coords = self.get_coordinates_from_address_string(address)
+                if coords:
+                    return coords
+
+            cursor.close()
+            connection.close()
+
+        except Exception as e:
+            print(f"An error occurred while fetching user coordinates: {e}")
+
+        return 51.505, -0.09  # Default to London
+
+    def fetch_listings(self):
+        """Fetch all listings from the database and create VehicleListing instances."""
+        try:
+            db = DB.Database()
+            connection = db.connect()
+
+            if connection is None:
+                print("Failed to connect to the database.")
+                return
+
+            cursor = connection.cursor()
+            query = "SELECT id FROM vehicle_listing WHERE status = 'listed'"
+            cursor.execute(query)
+            results = cursor.fetchall()
+
+            for row in results:
+                listing_id = row[0]
+                listing = VehicleListing(listing_id)
+                self.listings.append(listing)
+
+            cursor.close()
+            connection.close()
+
+            print(f"Fetched {len(self.listings)} listings from the database.")
+
+        except Exception as e:
+            print(f"An error occurred while fetching listings: {e}")
+
+    def place_pins(self):
+        """Convert addresses to coordinates and place pins on the map."""
+        for listing in self.listings:
+            # Skip listings that belong to the logged-in user
+            if listing.name_of_user == self.user.username:
+                continue
+
+            if listing.country and listing.city and listing.street and listing.number:
+                address = f"{listing.street} {listing.number}, {listing.city}, {listing.country}"
+                coords = self.get_coordinates_from_address_string(address)
+                if coords:
+                    pin = Pin(latitude=coords[0], longitude=coords[1], title=f"Listing ID: {listing.id}")
+                    self.map_widget.place(pin)
+
+    def get_coordinates_from_address_string(self, address):
+        """Convert an address string to latitude and longitude using a geocoding API."""
+        try:
+            url = "https://nominatim.openstreetmap.org/search"
+            params = {"q": address, "format": "json"}
+            headers = {"User-Agent": "PyQtMapApp"}
+            response = requests.get(url, params=params, headers=headers)
+            data = response.json()
+            if data:
+                lat = float(data[0]["lat"])
+                lon = float(data[0]["lon"])
+                return lat, lon
+        except Exception as e:
+            print(f"Geocoding error: {e}")
+        return None
+
+    def perform_search(self):
+        """Perform a search using the search bar and center the map."""
+        location = self.search_bar.text().strip()
+        if location:
+            coords = self.get_coordinates_from_address_string(location)
+            if coords:
+                self.map_widget.center_map(coords[0], coords[1])
+            else:
+                print(f"Could not find coordinates for location: {location}")
+        else:
+            print("Search bar is empty. Please enter a location.")
+
+    def open_filter_popup(self):
+        """Open the filter popup."""
+        print("Opening filter popup.")  # Debug
+        filter_dialog = Filter(self.map_widget, self)
+        filter_dialog.exec_()
 
     def do_nothing(self, event):
+        """Placeholder for unimplemented functionality."""
         pass

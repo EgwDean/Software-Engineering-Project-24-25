@@ -6,8 +6,11 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QDate
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from pathlib import Path
 from services.Graph import Graph
+from services.ExportStatistics import ExportStatistics
 from screens.GraphScreen import GraphScreen
 
 class StatisticScreen(QWidget):
@@ -16,7 +19,7 @@ class StatisticScreen(QWidget):
         self.admin_user = admin_user
         self.setWindowTitle("Statistics")
         self.setStyleSheet("background-color: #f0f0f0;")
-        self.setFixedSize(800, 500)
+        self.setFixedSize(900, 520)
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -117,6 +120,17 @@ class StatisticScreen(QWidget):
         """)
         graph_button.clicked.connect(self.show_graph)
 
+        # Προσθήκη του κουμπιού Export Statistics
+        export_button = QPushButton("Export Statistics")
+        export_button.setStyleSheet(""" 
+            padding: 6px;
+            font-size: 14px;
+            background-color: #f0ad4e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        """)
+        export_button.clicked.connect(self.export_statistics)
 
         sidebar_layout.addWidget(self.brand_input)
         sidebar_layout.addWidget(self.model_input)
@@ -125,6 +139,7 @@ class StatisticScreen(QWidget):
         sidebar_layout.addWidget(self.status_input)
         sidebar_layout.addWidget(filter_button)
         sidebar_layout.addWidget(graph_button)
+        sidebar_layout.addWidget(export_button)
         sidebar_layout.addStretch()
 
         sidebar_frame = QFrame()
@@ -225,7 +240,6 @@ class StatisticScreen(QWidget):
         pass
 
     def show_graph(self):
-        # Fetch statistics (could also be done with the current filters applied)
         try:
             results = FilterStatistics.fetch_statistics(
                 self.brand_input.text().strip(),
@@ -235,14 +249,54 @@ class StatisticScreen(QWidget):
                 self.status_input.text().strip()
             )
 
-            # Create a graph using the fetched data
+            # Δημιουργία γραφημάτων με Plotly
             graph = Graph(results)
-            graph_pixmap = graph.create_graph()
+            graph_html_paths = graph.create_graphs()  # HTML files για τα γραφήματα
 
-            # Create a new window to display the graph
-            self.graph_screen = GraphScreen(graph_pixmap)
+            # Εμφάνιση των γραφημάτων στην οθόνη
+            self.graph_screen = GraphScreen(graph_html_paths)
             self.graph_screen.show()
 
         except Exception as e:
             error_label = QLabel(f"Error: {e}")
             self.layout().addWidget(error_label)
+
+
+    def export_statistics(self):
+        try:
+            # Παίρνουμε τα αποτελέσματα
+            results = FilterStatistics.fetch_statistics(
+                self.brand_input.text().strip(),
+                self.model_input.text().strip(),
+                self.date_input.text().strip(),
+                self.vehicle_type_input.text().strip(),
+                self.status_input.text().strip()
+            )
+
+            # Άνοιγμα του διαλόγου για επιλογή τοποθεσίας και ονόματος αρχείου
+            options = QFileDialog.Options()
+            file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv);;All Files (*)", options=options)
+
+            # Ελέγχουμε αν ο χρήστης επέλεξε αρχείο
+            if file_path:
+                # Κλήση της κλάσης ExportStatistics για να αποθηκεύσουμε τα δεδομένα
+                ExportStatistics.save_to_csv(results, file_path)
+
+                # Εμφάνιση ενημερωτικού μηνύματος ότι η εξαγωγή ήταν επιτυχής
+                self.show_success_message()
+
+        except Exception as e:
+            error_label = QLabel(f"Error: {e}")
+            self.layout().addWidget(error_label)
+
+
+    def show_success_message(self):
+        # Δημιουργία του QMessageBox για την επιτυχία
+        success_msg = QMessageBox(self)
+        success_msg.setIcon(QMessageBox.Information)
+        success_msg.setWindowTitle("Export Successful")
+        success_msg.setText("Statistics exported successfully!")
+        success_msg.setStandardButtons(QMessageBox.Ok)
+        success_msg.exec_()
+
+

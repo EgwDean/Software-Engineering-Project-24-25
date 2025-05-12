@@ -4,11 +4,16 @@ import entities.Admin as AD
 from pathlib import Path
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QFrame,
-    QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem
+    QSizePolicy, QSpacerItem
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
-from screens.StatisticScreen import StatisticScreen  # Import the MenuScreen class
+from screens.StatisticScreen import StatisticScreen
+
+import requests
+from services.Map import Map
+from services.Pin import Pin
+
 
 class MenuScreen(QWidget):
     def __init__(self, admin_user):
@@ -16,7 +21,7 @@ class MenuScreen(QWidget):
         self.admin_user = admin_user
         self.setWindowTitle("Admin Menu")
         self.setStyleSheet("background-color: #f0f0f0;")
-        self.setFixedSize(800, 500)  # Set a fixed size for the window
+        self.setFixedSize(1300, 800)
 
         # Main layout
         main_layout = QVBoxLayout()
@@ -85,7 +90,7 @@ class MenuScreen(QWidget):
         nav_menu = QVBoxLayout()
         nav_menu.setAlignment(Qt.AlignTop)
 
-        # Adding "Report Handling" button with frame
+        # Report Handling button
         report_button = QPushButton("Report Handling")
         report_button.setStyleSheet("""
             padding: 10px;
@@ -97,7 +102,6 @@ class MenuScreen(QWidget):
         """)
         report_button.clicked.connect(self.report_handling)
 
-        # Frame for Report Handling button
         report_button_frame = QFrame()
         report_button_frame.setStyleSheet("border: 2px solid #ccc; padding: 5px; border-radius: 5px;")
         report_button_layout = QVBoxLayout()
@@ -105,7 +109,7 @@ class MenuScreen(QWidget):
         report_button_frame.setLayout(report_button_layout)
         nav_menu.addWidget(report_button_frame)
 
-        # Adding "View Statistics" button with frame
+        # View Statistics button
         statistics_button = QPushButton("View Statistics")
         statistics_button.setStyleSheet("""
             padding: 10px;
@@ -117,7 +121,6 @@ class MenuScreen(QWidget):
         """)
         statistics_button.clicked.connect(self.displayStatisticScreen)
 
-        # Frame for View Statistics button
         statistics_button_frame = QFrame()
         statistics_button_frame.setStyleSheet("border: 2px solid #ccc; padding: 5px; border-radius: 5px;")
         statistics_button_layout = QVBoxLayout()
@@ -133,72 +136,24 @@ class MenuScreen(QWidget):
         nav_menu_frame.setStyleSheet("background-color: skyblue;")
         content_layout.addWidget(nav_menu_frame)
 
-        # Create the table widget for vehicle listings
-        table_widget = QTableWidget()
-        table_widget.setColumnCount(4)
-        table_widget.setHorizontalHeaderLabels(["Listing id", "User", "Brand", "Model"])
-        table_widget.setStyleSheet("""
-            QTableWidget {
-                font-size: 14px;
-                gridline-color: #ccc;
-                border: 1px solid #ccc;
-            }
-            QHeaderView::section {
-                background-color: lightgray;
-                font-weight: bold;
-                padding: 6px;
-                border: none;
-            }
-        """)
+        # === Map Widget ===
+        latitude, longitude = self.get_coordinates_from_address(self.admin_user)
+        self.map_widget = Map(latitude=latitude, longitude=longitude)
+        content_layout.addWidget(self.map_widget)
 
-        table_widget.setShowGrid(True)
-        table_widget.setEditTriggers(QTableWidget.NoEditTriggers)  # Disable editing
-        table_widget.setSelectionBehavior(QTableWidget.SelectRows)
-        table_widget.setAlternatingRowColors(True)
+        # Dummy listings to add pins (replace with real ones if needed)
+        listings = [
+            {"title": "Car A", "address": "Athens, Greece"},
+            {"title": "Car B", "address": "Thessaloniki, Greece"},
+            {"title": "Car C", "address": "Patras, Greece"}
+        ]
+        for listing in listings:
+            coords = self.get_coordinates_from_address_string(listing["address"])
+            if coords:
+                pin = Pin(latitude=coords[0], longitude=coords[1], title=listing["title"])
+                self.map_widget.place(pin)
 
-        # Title for the table section (Latest) above the table
-        latest_label = QLabel("Latest")
-        latest_label.setAlignment(Qt.AlignCenter)
-        latest_label.setStyleSheet("""
-            font-size: 18px;
-            font-style: italic;
-            color: #333;
-            font-family: 'Arial', sans-serif;
-            margin-bottom: 10px;
-        """)
-        
-        # Add the "Latest" label above the table
-        content_layout.addWidget(latest_label)
-
-        # Connect to the database and fetch the data
-        conn = DB.Database.connect()
-        if conn and conn.is_connected():
-            cursor = conn.cursor()
-            try:
-                cursor.execute("SELECT id, name_of_user, brand, model FROM vehicle_listing WHERE status = 'completed' LIMIT 5;")
-                results = cursor.fetchall()
-
-                table_widget.setRowCount(len(results))
-                for row_index, row_data in enumerate(results):
-                    for col_index, col_data in enumerate(row_data):
-                        item = QTableWidgetItem(str(col_data))
-                        item.setFlags(Qt.ItemIsEnabled)  # Non-editable
-                        table_widget.setItem(row_index, col_index, item)
-
-            except Exception as e:
-                error_label = QLabel(f"Error: {e}")
-                content_layout.addWidget(error_label)
-            finally:
-                cursor.close()
-                conn.close()
-        else:
-            error_label = QLabel("Could not connect to database.")
-            content_layout.addWidget(error_label)
-
-        # Add the table widget below the "Latest" title
-        content_layout.addWidget(table_widget)
-
-        # Set the layout of the main window
+        # Add map widget to content layout
         main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
 
@@ -216,14 +171,30 @@ class MenuScreen(QWidget):
     def do_nothing(self, event):
         pass
 
-    # Method for handling the "Report Handling" button
     def report_handling(self):
         print("Report Handling is clicked!")
-        # Add your logic for Report Handling here
 
-    # Method for handling the "View Statistics" button
     def displayStatisticScreen(self):
         print("View Statistics is clicked!")
-        self.admin_window = StatisticScreen(AD.Admin(self.admin_user.username))  # Create an instance of StatisticScreen
-        self.admin_window.show()  # Show the StatisticScreen window
-        self.close()  # Close the current MenuScreen window
+        self.admin_window = StatisticScreen(AD.Admin(self.admin_user.username))
+        self.admin_window.show()
+        self.close()
+
+    def get_coordinates_from_address(self, user):
+        address = f"{getattr(user, 'street', 'Athens')}, {getattr(user, 'city', 'Athens')}, {getattr(user, 'country', 'Greece')}"
+        return self.get_coordinates_from_address_string(address)
+
+    def get_coordinates_from_address_string(self, address):
+        try:
+            url = "https://nominatim.openstreetmap.org/search"
+            params = {"q": address, "format": "json"}
+            headers = {"User-Agent": "PyQtMapApp"}
+            response = requests.get(url, params=params, headers=headers)
+            data = response.json()
+            if data:
+                lat = float(data[0]["lat"])
+                lon = float(data[0]["lon"])
+                return lat, lon
+        except Exception as e:
+            print(f"Geocoding error: {e}")
+        return 51.505, -0.09  # fallback
