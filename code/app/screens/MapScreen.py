@@ -6,7 +6,9 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from pathlib import Path
 from screens.ListingsScreen import ListingsScreen
-from screens.ProfileScreen import ProfileScreen  # Import ProfileScreen
+from screens.ProfileScreen import ProfileScreen  
+from screens.MyListingsScreen import MyListingsScreen
+
 
 
 class MapScreen(QWidget):
@@ -86,7 +88,7 @@ class MapScreen(QWidget):
         nav_menu = QVBoxLayout()
         nav_menu.setAlignment(Qt.AlignTop)
 
-        # Only change: replace "TODO 1" with "Listings"
+        
         for i in range(5):
             label = "VIEW ALL LISTINGS" if i == 0 else f"TODO {i + 1}"
             button = QPushButton(label)

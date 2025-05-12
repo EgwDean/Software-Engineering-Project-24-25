@@ -3,8 +3,10 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QPushButton, QFrame, QHBoxLayout, QScrollArea
 )
 from PyQt5.QtCore import Qt
-from screens.ListEditingScreen import ListEditingScreen  # Εισαγωγή της οθόνης ListEditingScreen
-from screens.ListingScreen import ListingScreen  # Για το "View More"
+from functools import partial
+from screens.ListEditingScreen import ListEditingScreen
+from screens.ListingScreen import ListingScreen
+
 
 class MyListingsScreen(QWidget):
     def __init__(self, user):
@@ -15,11 +17,10 @@ class MyListingsScreen(QWidget):
 
         main_layout = QVBoxLayout()
 
-        # Top layout (for back button and header)
+        # Top layout
         top_layout = QHBoxLayout()
         top_layout.setAlignment(Qt.AlignLeft)
 
-        # Back button
         back_button = QPushButton("Back to Map")
         back_button.setStyleSheet("""
             padding: 12px 20px;
@@ -31,7 +32,6 @@ class MyListingsScreen(QWidget):
         back_button.clicked.connect(self.back_to_map)
         top_layout.addWidget(back_button)
 
-        # Header
         header_label = QLabel(f"Your Listings")
         header_label.setStyleSheet("""
             font-size: 40px;
@@ -43,9 +43,9 @@ class MyListingsScreen(QWidget):
 
         main_layout.addLayout(top_layout)
 
-        # Listings layout (the actual listings)
+        # Listings layout
         self.listings_layout = QVBoxLayout()
-        self.update_listings()  # Initial data fetch
+        self.update_listings()
 
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
@@ -57,12 +57,10 @@ class MyListingsScreen(QWidget):
         self.setLayout(main_layout)
 
     def update_listings(self, listings=None):
-        # If no listings are passed, fetch them from the DB
         if listings is None:
             listings = self.fetch_listings_from_db()
 
-        # Clear current listings
-        for i in range(self.listings_layout.count()):
+        for i in reversed(range(self.listings_layout.count())):
             widget = self.listings_layout.itemAt(i).widget()
             if widget:
                 widget.deleteLater()
@@ -109,7 +107,7 @@ class MyListingsScreen(QWidget):
                     border-radius: 5px;
                     font-size: 14px;
                 """)
-                view_more_button.clicked.connect(lambda _, l=listing: self.open_listing_screen(l))
+                view_more_button.clicked.connect(partial(self.open_listing_screen, listing))
                 listing_layout.addWidget(view_more_button)
 
                 # Edit Button
@@ -121,59 +119,46 @@ class MyListingsScreen(QWidget):
                     border-radius: 5px;
                     font-size: 14px;
                 """)
-                edit_button.clicked.connect(lambda _, l=listing: self.open_edit_screen(l))
+                edit_button.clicked.connect(partial(self.open_edit_screen, listing))
                 listing_layout.addWidget(edit_button)
 
                 listing_frame.setLayout(listing_layout)
                 self.listings_layout.addWidget(listing_frame)
 
     def open_listing_screen(self, listing_data):
-        """ Άνοιγμα της οθόνης ListingScreen με δεδομένα της αγγελίας """
-        print("Opening ListingScreen")  # Έλεγχος αν καλείται η συνάρτηση
-        from screens.ListingScreen import ListingScreen  # Καθυστέρηση της εισαγωγής για αποφυγή κυκλικής εξάρτησης
-        listing_screen = ListingScreen(self.user, listing_data)  # Δημιουργία και εμφάνιση της οθόνης με τα δεδομένα της αγγελίας
-        listing_screen.show()
+        print("Opening ListingScreen")
+        self.listing_screen = ListingScreen(self.user, listing_data)
+        self.listing_screen.show()
 
     def open_edit_screen(self, listing_data):
-        """ Άνοιγμα της οθόνης ListEditingScreen με δεδομένα της αγγελίας """
-        print("Opening ListEditingScreen")  # Έλεγχος αν καλείται η συνάρτηση
-        edit_screen = ListEditingScreen(self.user, listing_data)  # Δημιουργία και εμφάνιση της οθόνης με τα δεδομένα της αγγελίας
-        edit_screen.show()  # Εμφάνιση της οθόνης
+        print("Opening ListEditingScreen")
+        self.edit_screen = ListEditingScreen(self.user, listing_data)
+        self.edit_screen.show()
 
     def fetch_listings_from_db(self, filters=None):
         try:
             db = DB.Database()
             db_connection = db.connect()
-
             if db_connection is None:
                 print("Failed to connect to the database.")
                 return []
-
             cursor = db_connection.cursor(dictionary=True)
-
-            # Fetch listings for the current user
             query = "SELECT * FROM vehicle_listing WHERE name_of_user = %s"
             params = [self.user.username]
-
-            if filters:
-                if filters.get("brand"):
-                    query += " AND brand LIKE %s"
-                    params.append(f"%{filters['brand']}%")
-
+            if filters and filters.get("brand"):
+                query += " AND brand LIKE %s"
+                params.append(f"%{filters['brand']}%")
             cursor.execute(query, tuple(params))
             listings = cursor.fetchall()
-
             cursor.close()
             db_connection.close()
-
             return listings
-
         except Exception as e:
             print(f"Error fetching listings: {e}")
             return []
 
     def back_to_map(self):
-        from screens.MapScreen import MapScreen  # Lazy import to avoid circular import
+        from screens.MapScreen import MapScreen
         map_screen = MapScreen(self.user)
         map_screen.show()
         self.close()
