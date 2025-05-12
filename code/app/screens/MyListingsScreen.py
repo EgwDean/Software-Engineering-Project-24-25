@@ -41,6 +41,18 @@ class MyListingsScreen(QWidget):
         """)
         top_layout.addWidget(header_label)
 
+        # Adding the Refresh Button
+        refresh_button = QPushButton("Refresh")
+        refresh_button.setStyleSheet("""
+            padding: 12px 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+        """)
+        refresh_button.clicked.connect(self.refresh_screen)  # Connecting to the refresh method
+        top_layout.addWidget(refresh_button)
+
         main_layout.addLayout(top_layout)
 
         # Listings layout
@@ -162,3 +174,7 @@ class MyListingsScreen(QWidget):
         map_screen = MapScreen(self.user)
         map_screen.show()
         self.close()
+
+    def refresh_screen(self):
+        # Refresh the listings by calling update_listings again
+        self.update_listings()

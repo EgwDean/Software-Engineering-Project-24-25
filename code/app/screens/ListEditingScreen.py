@@ -1,10 +1,10 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QDateEdit
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QDateEdit, QMessageBox
 from PyQt5.QtCore import QDate
 import services.Database as DB
 
 class ListEditingScreen(QWidget):
-    def __init__(self, user, listing_data):
-        super().__init__()
+    def __init__(self, user, listing_data, parent=None):
+        super().__init__(parent)
         self.user = user
         self.listing_data = listing_data
         self.setWindowTitle("Edit Listing")
@@ -77,9 +77,45 @@ class ListEditingScreen(QWidget):
         save_button.clicked.connect(self.save_changes)
         layout.addWidget(save_button)
 
+        # --- Delete Button
+        delete_button = QPushButton("Delete Listing")
+        delete_button.setStyleSheet("""
+            padding: 12px 20px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+        """)
+        delete_button.clicked.connect(self.delete_listing)
+        layout.addWidget(delete_button)
+
         self.setLayout(layout)
 
+    def validate_listing(self):
+        fields = [
+            self.price_input.text(),
+            self.vehicle_type_input.text(),
+            self.brand_input.text(),
+            self.model_input.text(),
+            self.year_input.text(),
+            self.km_input.text(),
+            self.fuel_input.text(),
+            self.description_input.text(),
+            self.from_date_input.date().toString("yyyy-MM-dd"),
+            self.to_date_input.date().toString("yyyy-MM-dd"),
+            self.status_input.text()
+        ]
+        
+        for field in fields:
+            if not field.strip():
+                return False
+        return True
+
     def save_changes(self):
+        if not self.validate_listing():
+            print("Please fill in all fields.")
+            return
+
         try:
             db = DB.Database()
             conn = db.connect()
@@ -128,7 +164,58 @@ class ListEditingScreen(QWidget):
             conn.close()
             print("Changes saved successfully.")
 
-            self.close()
+            # Εμφάνιση του Popup
+            self.show_popup()
 
         except Exception as e:
             print(f"Error saving changes: {e}")
+
+    def show_popup(self):
+        # Δημιουργία του Popup για την επιβεβαίωση
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Information)
+        msg.setWindowTitle("UpdateScreen")
+        msg.setText("Your listing has been updated successfully!")
+        msg.setStandardButtons(QMessageBox.Ok)  # Προσθήκη κουμπιού OK
+        msg.buttonClicked.connect(self.close_and_return)  # Σύνδεση κουμπιού με την ενέργεια
+        msg.exec_()
+
+    def close_and_return(self, button):
+        self.close()  # Κλείσιμο της τρέχουσας οθόνης
+        if self.parent():  # Ελέγχουμε αν υπάρχει γονέας
+            self.parent().show()  # Επιστροφή στην προηγούμενη οθόνη
+
+    def delete_listing(self):
+        # Δημιουργία του Popup για επιβεβαίωση διαγραφής
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Warning)
+        msg.setWindowTitle("AttentionScreen")
+        msg.setText(f"Are you sure you want to delete the listing: {self.listing_data['brand']} {self.listing_data['model']} ({self.listing_data['year']})?")
+        msg.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
+        msg.buttonClicked.connect(self.confirm_delete)
+        msg.exec_()
+
+    def confirm_delete(self, button):
+        if button.text() == "OK":
+            try:
+                db = DB.Database()
+                conn = db.connect()
+                if conn is None:
+                    print("Database connection failed.")
+                    return
+
+                cursor = conn.cursor()
+                query = "DELETE FROM vehicle_listing WHERE id = %s AND name_of_user = %s"
+                cursor.execute(query, (self.listing_data["id"], self.user.username))
+                conn.commit()
+                cursor.close()
+                conn.close()
+                print("Listing deleted successfully.")
+
+                # Κλείσιμο της οθόνης και επιστροφή στην προηγούμενη οθόνη
+                self.close()
+                if self.parent():
+                    self.parent().show()
+
+            except Exception as e:
+                print(f"Error deleting listing: {e}")
