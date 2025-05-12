@@ -66,7 +66,7 @@ class MyListingsScreen(QWidget):
                 widget.deleteLater()
 
         if not listings:
-            no_listings_label = QLabel("No listings found.")
+            no_listings_label = QLabel("No listings found!")
             no_listings_label.setStyleSheet("""
                 font-size: 18px;
                 color: #999;
