@@ -15,6 +15,8 @@ class Map(QWebEngineView):
         self.setHtml(html)
 
     def place(self, pin):
+        """Add a pin to the map and reload it."""
+        print(f"Placing pin: {pin.title} at ({pin.latitude}, {pin.longitude})")  # Debug
         self.pins.append(pin)
         self.load_map()
 
@@ -22,6 +24,12 @@ class Map(QWebEngineView):
         """Center the map at the given latitude and longitude."""
         self.latitude = latitude
         self.longitude = longitude
+        self.load_map()
+
+    def clear_pins(self):
+        """Clear all pins from the map."""
+        print("Clearing all pins from the map.")  # Debug
+        self.pins = []
         self.load_map()
 
     def _generate_map_html(self, lat, lng, zoom, pins):
