@@ -1,7 +1,7 @@
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 
-class MapWidget(QWebEngineView):
+class Map(QWebEngineView):
     def __init__(self, latitude=51.505, longitude=-0.09, zoom=13, parent=None):
         super().__init__(parent)
         self.latitude = latitude
@@ -16,6 +16,12 @@ class MapWidget(QWebEngineView):
 
     def place(self, pin):
         self.pins.append(pin)
+        self.load_map()
+
+    def center_map(self, latitude, longitude):
+        """Center the map at the given latitude and longitude."""
+        self.latitude = latitude
+        self.longitude = longitude
         self.load_map()
 
     def _generate_map_html(self, lat, lng, zoom, pins):

@@ -11,7 +11,7 @@ from PyQt5.QtGui import QPixmap
 from screens.StatisticScreen import StatisticScreen
 
 import requests
-from services.Map import MapWidget
+from services.Map import Map
 from services.Pin import Pin
 
 
@@ -138,7 +138,7 @@ class MenuScreen(QWidget):
 
         # === Map Widget ===
         latitude, longitude = self.get_coordinates_from_address(self.admin_user)
-        self.map_widget = MapWidget(latitude=latitude, longitude=longitude)
+        self.map_widget = Map(latitude=latitude, longitude=longitude)
         content_layout.addWidget(self.map_widget)
 
         # Dummy listings to add pins (replace with real ones if needed)
