@@ -116,3 +116,4 @@ class ListingScreen(QWidget):
         self.book_page = BookPage(self.user, self.listing_data)
         self.book_page.show()
         self.close()
+        
