@@ -205,7 +205,7 @@ class ListEditingScreen(QWidget):
                     return
 
                 cursor = conn.cursor()
-                query = "DELETE FROM vehicle_listing WHERE id = %s AND name_of_user = %s"
+                query = "UPDATE vehicle_listing SET status = 'deleted' WHERE id = %s AND name_of_user = %s;"
                 cursor.execute(query, (self.listing_data["id"], self.user.username))
                 conn.commit()
                 cursor.close()
