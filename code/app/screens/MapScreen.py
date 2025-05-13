@@ -77,6 +77,18 @@ class MapScreen(QWidget):
         filter_button.clicked.connect(self.open_filter_popup)  # Connect to the filter popup
         top_menu_layout.addWidget(filter_button)
 
+        # Clear Filters button
+        clear_filters_button = QPushButton("Clear Filters")
+        clear_filters_button.setStyleSheet("""
+            padding: 8px;
+            font-size: 14px;
+            background-color: skyblue;
+            border: 1px solid black;
+            border-radius: 5px;
+        """)
+        clear_filters_button.clicked.connect(self.clear_filters)  # Connect to the clear_filters method
+        top_menu_layout.addWidget(clear_filters_button)
+
         # User icon
         user_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-user-30.png'
         if not user_icon_path.exists():
@@ -246,6 +258,15 @@ class MapScreen(QWidget):
         print("Opening filter popup.")  # Debug
         filter_dialog = Filter(self.map_widget, self)
         filter_dialog.exec_()
+
+    def clear_filters(self):
+        """Clear all filters and reload the pins."""
+        print("Clearing filters...")
+        self.listings = []  # Reset listings
+        self.fetch_listings()  # Re-fetch all listings
+        self.map_widget.clear_pins()  # Clear existing pins on the map
+        self.place_pins()  # Place all pins again
+        print("Filters cleared and pins reloaded.")
 
     def do_nothing(self, event):
         """Placeholder for unimplemented functionality."""
