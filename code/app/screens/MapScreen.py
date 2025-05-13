@@ -6,10 +6,6 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from pathlib import Path
 from screens.ListingsScreen import ListingsScreen
-from screens.ProfileScreen import ProfileScreen  
-from screens.MyListingsScreen import MyListingsScreen
-
-
 
 class MapScreen(QWidget):
     def __init__(self, user):
@@ -88,7 +84,6 @@ class MapScreen(QWidget):
         nav_menu = QVBoxLayout()
         nav_menu.setAlignment(Qt.AlignTop)
 
-        
         for i in range(5):
             label = "VIEW ALL LISTINGS" if i == 0 else f"TODO {i + 1}"
             button = QPushButton(label)
@@ -163,7 +158,8 @@ class MapScreen(QWidget):
         self.listings_window.show()
 
     def open_profile_screen(self, event=None):
-        # Create and show the ProfileScreen window
-        self.profile_screen = ProfileScreen(self.user)
-        self.profile_screen.show()
-        self.close()
+        # Αναβολή της εισαγωγής της ProfileScreen εδώ
+        from screens.ProfileScreen import ProfileScreen  # Εισάγουμε την ProfileScreen μόνο όταν χρειάζεται
+        self.profile_screen = ProfileScreen(self.user, self)  # Δημιουργούμε την ProfileScreen
+        self.profile_screen.show()  # Εμφανίζουμε την ProfileScreen
+        self.close()  # Κλείνουμε την MapScreen
