@@ -12,6 +12,7 @@ import services.Database as DB
 from services.Search import Search
 from services.Filter import Filter 
 from screens.DetailsScreen import DetailsScreen
+from screens.HistoryPage import HistoryPage
 
 
 class MapScreen(QWidget):
@@ -116,7 +117,12 @@ class MapScreen(QWidget):
         nav_menu.setAlignment(Qt.AlignTop)
 
         for i in range(5):
-            button = QPushButton(f"TODO {i + 1}")
+            if i == 1:
+                button = QPushButton("History")
+                button.clicked.connect(self.open_history)
+            else:
+                button = QPushButton(f"TODO {i + 1}")
+
             button.setStyleSheet("""
                 padding: 10px;
                 font-size: 14px;
@@ -124,7 +130,11 @@ class MapScreen(QWidget):
                 border: none;
                 color: white;
                 text-align: left;
-            """)
+            """
+            "QPushButton:hover {"
+            "background-color: deepskyblue;"
+            "}"
+            )
             nav_menu.addWidget(button)
 
         nav_menu.addStretch()
@@ -232,6 +242,13 @@ class MapScreen(QWidget):
         """Open the DetailsScreen window for the selected listing."""
         self.details_window = DetailsScreen(listing_id, user=self.user)
         self.details_window.show()
+
+    def open_history(self):
+        """Instantiate and show the HistoryPage."""
+        history_page = HistoryPage(self.user)
+        history_page.back_requested.connect(self.show)
+        self.hide()
+        history_page.show()
 
     def get_coordinates_from_address_string(self, address):
         """Convert an address string to latitude and longitude using a geocoding API."""
