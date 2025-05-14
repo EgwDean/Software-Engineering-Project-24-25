@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QPushButton, QVBoxLayo
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap
 from pathlib import Path
-#from screens.BookPage import BookPage
+from screens.BookPage import BookPage
 
 class ListingScreen(QWidget):
     def __init__(self, user, listing_data):
