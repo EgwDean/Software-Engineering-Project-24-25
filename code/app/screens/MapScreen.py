@@ -230,7 +230,7 @@ class MapScreen(QWidget):
 
     def open_details_screen(self, listing_id):
         """Open the DetailsScreen window for the selected listing."""
-        self.details_window = DetailsScreen(listing_id)
+        self.details_window = DetailsScreen(listing_id, user=self.user)
         self.details_window.show()
 
     def get_coordinates_from_address_string(self, address):

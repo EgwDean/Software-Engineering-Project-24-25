@@ -2,11 +2,14 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap
 import services.Database as DB
+from screens.ListingScreen import ListingScreen
 import os
 
 class DetailsScreen(QWidget):
-    def __init__(self, listing_id, parent=None):
+    def __init__(self, listing_id, user, parent=None):
         super().__init__(parent)
+        self.user = user
+        self.listing = None
         brand = "Unknown"
         model = "Unknown"
 
@@ -15,11 +18,14 @@ class DetailsScreen(QWidget):
             connection = db.connect()
             if connection:
                 cursor = connection.cursor()
-                query = "SELECT brand, model FROM vehicle_listing WHERE id = %s"
+                query = "SELECT * FROM vehicle_listing WHERE id = %s"
                 cursor.execute(query, (listing_id,))
                 result = cursor.fetchone()
                 if result:
-                    brand, model = result
+                    columns = [desc[0] for desc in cursor.description]
+                    self.listing = dict(zip(columns, result))
+                    brand = self.listing['brand']
+                    model = self.listing['model']
                 cursor.close()
                 connection.close()
         except Exception as e:
@@ -72,11 +78,12 @@ class DetailsScreen(QWidget):
             }
             """
         )
-        show_more_btn.clicked.connect(self.showMore)
+        show_more_btn.clicked.connect(lambda: self.showMore(self.listing))
         layout.addWidget(show_more_btn, alignment=Qt.AlignHCenter)
 
         layout.addStretch()
         self.setLayout(layout)
 
-    def showMore(self):
-        pass
+    def showMore(self, listing_data):
+        self.listing_screen = ListingScreen(self.user, listing_data)
+        self.listing_screen.show()
