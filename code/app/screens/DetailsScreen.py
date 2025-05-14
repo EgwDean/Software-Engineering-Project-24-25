@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap
 import services.Database as DB
@@ -55,5 +55,28 @@ class DetailsScreen(QWidget):
             image_label.setAlignment(Qt.AlignHCenter)
             layout.addWidget(image_label)
 
+        # Show More button
+        show_more_btn = QPushButton("Show More")
+        show_more_btn.setStyleSheet(
+            """
+            QPushButton {
+                background-color: skyblue;
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                padding: 8px 0;
+                outline: none;
+            }
+            QPushButton:focus {
+                outline: none;
+            }
+            """
+        )
+        show_more_btn.clicked.connect(self.showMore)
+        layout.addWidget(show_more_btn, alignment=Qt.AlignHCenter)
+
         layout.addStretch()
         self.setLayout(layout)
+
+    def showMore(self):
+        pass
