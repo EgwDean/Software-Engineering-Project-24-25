@@ -10,7 +10,8 @@ from services.Pin import Pin
 from entities.VehicleListing import VehicleListing
 import services.Database as DB
 from services.Search import Search
-from services.Filter import Filter  # Import the Filter class
+from services.Filter import Filter 
+from screens.DetailsScreen import DetailsScreen
 
 
 class MapScreen(QWidget):
@@ -223,7 +224,14 @@ class MapScreen(QWidget):
                 coords = self.get_coordinates_from_address_string(address)
                 if coords:
                     pin = Pin(latitude=coords[0], longitude=coords[1], title=f"Listing ID: {listing.id}")
+                    # Fix: lambda expects no arguments
+                    pin.clicked.connect(lambda l_id=listing.id: self.open_details_screen(l_id))
                     self.map_widget.place(pin)
+
+    def open_details_screen(self, listing_id):
+        """Open the DetailsScreen window for the selected listing."""
+        self.details_window = DetailsScreen(listing_id)
+        self.details_window.show()
 
     def get_coordinates_from_address_string(self, address):
         """Convert an address string to latitude and longitude using a geocoding API."""
@@ -267,7 +275,3 @@ class MapScreen(QWidget):
         self.map_widget.clear_pins()  # Clear existing pins on the map
         self.place_pins()  # Place all pins again
         print("Filters cleared and pins reloaded.")
-
-    def do_nothing(self, event):
-        """Placeholder for unimplemented functionality."""
-        pass
