@@ -13,6 +13,7 @@ from services.Search import Search
 from services.Filter import Filter 
 from screens.DetailsScreen import DetailsScreen
 from screens.HistoryPage import HistoryPage
+from screens.ListingsScreen import ListingsScreen
 
 
 class MapScreen(QWidget):
@@ -95,13 +96,12 @@ class MapScreen(QWidget):
         user_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-user-30.png'
         if not user_icon_path.exists():
             raise FileNotFoundError(f"User icon file not found at {user_icon_path}")
-        user_button = QToolButton()
-        user_button.setIcon(QIcon(str(user_icon_path)))  # Wrap QPixmap in QIcon
-        user_button.setStyleSheet("""
-            border: none;
-            background-color: transparent;
-        """)
-        top_menu_layout.addWidget(user_button)
+        user_label = QLabel()
+        user_pixmap = QPixmap(str(user_icon_path))
+        user_label.setPixmap(user_pixmap.scaledToWidth(30, Qt.SmoothTransformation))
+        user_label.setCursor(Qt.PointingHandCursor)
+        user_label.mousePressEvent = self.open_profile_screen  # Link to ProfileScreen
+        top_menu_layout.addWidget(user_label)
 
         top_menu_frame = QFrame()
         top_menu_frame.setLayout(top_menu_layout)
@@ -117,7 +117,10 @@ class MapScreen(QWidget):
         nav_menu.setAlignment(Qt.AlignTop)
 
         for i in range(5):
-            if i == 1:
+            if i == 0:
+                button = QPushButton("View All Listings")
+                button.clicked.connect(self.open_listings)
+            elif i == 1:
                 button = QPushButton("History")
                 button.clicked.connect(self.open_history)
             else:
@@ -128,13 +131,10 @@ class MapScreen(QWidget):
                 font-size: 14px;
                 background-color: skyblue;
                 border: none;
-                color: white;
+                color: black;
                 text-align: left;
-            """
-            "QPushButton:hover {"
-            "background-color: deepskyblue;"
-            "}"
-            )
+                border: 1px solid black;
+            """)
             nav_menu.addWidget(button)
 
         nav_menu.addStretch()
@@ -249,6 +249,17 @@ class MapScreen(QWidget):
         history_page.back_requested.connect(self.show)
         self.hide()
         history_page.show()
+
+    def open_listings(self, event=None):
+        # Create and show the ListingsScreen window
+        self.listings_window = ListingsScreen(self.user)
+        self.listings_window.show()
+
+    def open_profile_screen(self, event=None):
+        # Αναβολή της εισαγωγής της ProfileScreen εδώ
+        from screens.ProfileScreen import ProfileScreen  # Εισάγουμε την ProfileScreen μόνο όταν χρειάζεται
+        self.profile_screen = ProfileScreen(self.user, self)  # Δημιουργούμε την ProfileScreen
+        self.profile_screen.show()  # Εμφανίζουμε την ProfileScreen
 
     def get_coordinates_from_address_string(self, address):
         """Convert an address string to latitude and longitude using a geocoding API."""
