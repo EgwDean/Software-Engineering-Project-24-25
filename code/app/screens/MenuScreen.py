@@ -173,6 +173,9 @@ class MenuScreen(QWidget):
 
     def report_handling(self):
         print("Report Handling is clicked!")
+        self.admin_window = StatisticScreen(AD.Admin(self.admin_user.username))
+        self.admin_window.show()
+        self.close()
 
     def displayStatisticScreen(self):
         print("View Statistics is clicked!")
