@@ -170,9 +170,6 @@ class MyListingsScreen(QWidget):
             return []
 
     def back_to_map(self):
-        from screens.MapScreen import MapScreen
-        map_screen = MapScreen(self.user)
-        map_screen.show()
         self.close()
 
     def refresh_screen(self):
