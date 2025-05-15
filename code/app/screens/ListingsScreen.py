@@ -194,8 +194,8 @@ class ListingsScreen(QWidget):
         conn = DB.connect()
         cursor = conn.cursor(dictionary=True)
 
-        query = "SELECT * FROM vehicle_listing WHERE 1"
-        params = []
+        query = "SELECT * FROM vehicle_listing WHERE 1 AND name_of_user != %s"
+        params = [self.user.username]
 
         if filters:
             if filters["price_per_day"]:
