@@ -28,10 +28,9 @@ class ListingScreen(QWidget):
         main_layout.addWidget(title_label)
 
         # Εικόνες: Προβολή στις πρώτες θέσεις χωρίς Scroll
-        image_layout = QHBoxLayout()  # Οριζόντιο layout για τις εικόνες
+        image_layout = QHBoxLayout()
         image_layout.setSpacing(10)
 
-        # Φόρτωση εικόνων από το φάκελο
         for img_file in sorted(self.assets_dir.glob(f"img_{self.listing_data['id']}_*.jpg")):
             img_label = QLabel()
             pixmap = QPixmap(str(img_file)).scaled(200, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation)
@@ -63,12 +62,10 @@ class ListingScreen(QWidget):
         for key, label_name in fields.items():
             value = self.listing_data.get(key, "N/A")
 
-            # Ετικέτα τίτλου πεδίου
             label = QLabel(f"{label_name}:")
             label.setStyleSheet("font-weight: bold; font-size: 15px; color: #333;")
             label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
-            # Ετικέτα τιμής πεδίου
             value_label = QLabel(f"{value}")
             value_label.setStyleSheet("font-size: 15px; color: #007bff;")
             value_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
@@ -86,26 +83,29 @@ class ListingScreen(QWidget):
         line.setStyleSheet("color: #ccc; margin: 10px 0;")
         main_layout.addWidget(line)
 
-        # Κουμπί Book Now
-        book_button = QPushButton("Rent Now")
-        book_button.setStyleSheet("""
-            QPushButton {
-                padding: 12px 24px;
-                background-color: skyblue;
-                color: white;
-                border-radius: 8px;
-                font-size: 16px;
-            }
-        """)
-        book_button.clicked.connect(self.open_book_page)
-        book_button.setFixedWidth(200)
-        book_button.setCursor(Qt.PointingHandCursor)
+        # Έλεγχος αν το listing ανήκει στον τρέχοντα χρήστη
+        if self.user.username.lower() != self.listing_data.get("name_of_user", "").lower():
 
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-        button_layout.addWidget(book_button)
-        button_layout.addStretch()
-        main_layout.addLayout(button_layout)
+            # Κουμπί Book Now
+            book_button = QPushButton("Rent Now")
+            book_button.setStyleSheet("""
+                QPushButton {
+                    padding: 12px 24px;
+                    background-color: skyblue;
+                    color: white;
+                    border-radius: 8px;
+                    font-size: 16px;
+                }
+            """)
+            book_button.clicked.connect(self.open_book_page)
+            book_button.setFixedWidth(200)
+            book_button.setCursor(Qt.PointingHandCursor)
+
+            button_layout = QHBoxLayout()
+            button_layout.addStretch()
+            button_layout.addWidget(book_button)
+            button_layout.addStretch()
+            main_layout.addLayout(button_layout)
 
         self.setLayout(main_layout)
 
