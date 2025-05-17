@@ -3,6 +3,8 @@ from pathlib import Path
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QTableWidget, QTableWidgetItem, QHBoxLayout, QFrame, QPushButton, QSizePolicy, QSpacerItem
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
+from screens.AdminDetailsScreen import AdminDetailsScreen 
+from services.ReportHandler import ReportHandler # Εισάγουμε την οθόνη λεπτομερειών
 
 class ManagmentScreen(QWidget):
     def __init__(self, admin_user):
@@ -12,10 +14,12 @@ class ManagmentScreen(QWidget):
         self.setStyleSheet("background-color: #f0f0f0;")
         self.setFixedSize(900, 520)
 
+        self.selected_report_id = None  # Προσθήκη μεταβλητής για αποθήκευση ID
+
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        # === Top menu (ίδιο με MenuScreen) ===
+        # === Top menu ===
         top_menu_layout = QHBoxLayout()
         top_menu_layout.setAlignment(Qt.AlignLeft)
 
@@ -70,7 +74,6 @@ class ManagmentScreen(QWidget):
         self.table_widget.setAlternatingRowColors(True)
         self.table_widget.verticalHeader().setVisible(False)
 
-        # Custom styling με padding αριστερά και φαρδιά κελιά
         self.table_widget.setStyleSheet("""
             QTableWidget {
                 font-size: 14px;
@@ -112,7 +115,32 @@ class ManagmentScreen(QWidget):
             }
         """)
 
-        main_layout.addWidget(self.table_widget)
+        self.table_widget.cellClicked.connect(self.handle_row_selection)
+
+        # === Side Panel με κουμπί "More details" ===
+        content_layout = QHBoxLayout()
+        content_layout.addWidget(self.table_widget)
+
+        self.side_panel = QVBoxLayout()
+        self.side_panel.setAlignment(Qt.AlignTop)
+
+        self.more_details_button = QPushButton("More details")
+        self.more_details_button.setStyleSheet("""
+            padding: 10px;
+            font-size: 14px;
+            background-color: #5bc0de;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        """)
+        self.more_details_button.setCursor(Qt.PointingHandCursor)
+        self.more_details_button.setVisible(False)
+        self.more_details_button.clicked.connect(self.handle_more_details)
+
+        self.side_panel.addWidget(self.more_details_button)
+        content_layout.addLayout(self.side_panel)
+
+        main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
 
         self.load_reports()
@@ -128,8 +156,11 @@ class ManagmentScreen(QWidget):
         cursor = conn.cursor()
         try:
             query = """
-                SELECT name_reporter, comment, date_of_report, id_list_report, status
-                FROM reports
+                    SELECT r.name_reporter, r.comment, r.date_of_report, r.id_list_report, r.status
+                    FROM reports r
+                    INNER JOIN vehicle_listing vl ON r.id_list_report = vl.id
+                    WHERE r.status = 'pending'
+                    ORDER BY r.date_of_report DESC;
             """
             cursor.execute(query)
             results = cursor.fetchall()
@@ -141,7 +172,6 @@ class ManagmentScreen(QWidget):
                     item.setFlags(Qt.ItemIsEnabled)
                     self.table_widget.setItem(row_index, col_index, item)
 
-            # Αυτόματη προσαρμογή του πλάτους των στηλών σύμφωνα με το περιεχόμενο
             self.table_widget.resizeColumnsToContents()
 
         except Exception as e:
@@ -150,6 +180,21 @@ class ManagmentScreen(QWidget):
         finally:
             cursor.close()
             conn.close()
+
+    def handle_row_selection(self, row, column):
+        item = self.table_widget.item(row, 3)  # Listing ID
+        if item:
+            self.selected_report_id = item.text()
+            self.more_details_button.setVisible(True)
+
+
+    def handle_more_details(self):
+
+        self.report_handler = ReportHandler(self.selected_report_id)
+        self.details_screen = AdminDetailsScreen(self.admin_user, self.selected_report_id)
+        self.details_screen.show()
+        self.close()
+
 
     def logout(self):
         from screens.LoginPage import LoginPage
