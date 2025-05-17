@@ -79,6 +79,7 @@ CREATE TABLE reports (
     comment TEXT,
     date_of_report DATE,
     id_list_report INT NOT NULL,
+    status ENUM('pending', 'resolved', 'ignored'),
     PRIMARY KEY (name_reporter, id_list_report),
 	FOREIGN KEY (name_reporter) REFERENCES user(username),
 	FOREIGN KEY (id_list_report) REFERENCES vehicle_listing(id)  

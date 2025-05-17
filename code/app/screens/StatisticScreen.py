@@ -149,26 +149,58 @@ class StatisticScreen(QWidget):
         content_layout.addWidget(sidebar_frame)
 
         # Table
+        # Table (Improved Professional Look)
         self.table_widget = QTableWidget()
-        self.table_widget.setColumnCount(5)  # 5 columns (brand, model, vehicle_type, status, count)
+        self.table_widget.setColumnCount(5)
         self.table_widget.setHorizontalHeaderLabels(["Brand", "Model", "Vehicle Type", "Status", "Total Listings"])
-        self.table_widget.setStyleSheet(""" 
-            QTableWidget {
-                font-size: 14px;
-                gridline-color: #ccc;
-                border: 1px solid #ccc;
-            }
-            QHeaderView::section {
-                background-color: lightgray;
-                font-weight: bold;
-                padding: 6px;
-                border: none;
-            }
-        """)
-        self.table_widget.setShowGrid(True)
+        self.table_widget.setShowGrid(False)
         self.table_widget.setEditTriggers(QTableWidget.NoEditTriggers)
         self.table_widget.setSelectionBehavior(QTableWidget.SelectRows)
         self.table_widget.setAlternatingRowColors(True)
+        self.table_widget.verticalHeader().setVisible(False)
+
+        # Styling
+        self.table_widget.setStyleSheet("""
+            QTableWidget {
+                font-size: 13px;
+                border: none;
+                background-color: #ffffff;
+                alternate-background-color: #f9f9f9;
+            }
+            QHeaderView::section {
+                background-color: #34495e;
+                color: white;
+                font-weight: bold;
+                font-size: 13px;
+                padding: 8px;
+                border-bottom: 1px solid #dcdcdc;
+            }
+            QTableWidget::item {
+                padding: 8px;
+            }
+            QTableWidget::item:selected {
+                background-color: #3498db;
+                color: white;
+            }
+            QTableWidget::item:hover {
+                background-color: #ecf0f1;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #ecf0f1;
+                width: 8px;
+                margin: 0px 0px 0px 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #bdc3c7;
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+        """)
+
 
         content_layout.addWidget(self.table_widget)
         main_layout.addLayout(content_layout)
@@ -298,5 +330,8 @@ class StatisticScreen(QWidget):
         success_msg.setText("Statistics exported successfully!")
         success_msg.setStandardButtons(QMessageBox.Ok)
         success_msg.exec_()
+
+
+
 
 

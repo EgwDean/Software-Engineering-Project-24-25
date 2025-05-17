@@ -13,6 +13,7 @@ from screens.StatisticScreen import StatisticScreen
 import requests
 from services.Map import MapWidget
 from services.Pin import Pin
+from screens.ManagmentScreen import ManagmentScreen
 
 
 class MenuScreen(QWidget):
@@ -173,7 +174,7 @@ class MenuScreen(QWidget):
 
     def report_handling(self):
         print("Report Handling is clicked!")
-        self.admin_window = StatisticScreen(AD.Admin(self.admin_user.username))
+        self.admin_window = ManagmentScreen(AD.Admin(self.admin_user.username))
         self.admin_window.show()
         self.close()
 
