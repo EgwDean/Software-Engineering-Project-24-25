@@ -112,7 +112,7 @@ class CreateScreen(QWidget):
         self.showMaximized()
 
     def cancel(self):
-        self.close()
+        self.showMapScreen()
 
     def detailsNotify(self):
         self.notify_label.show()
@@ -151,3 +151,6 @@ class CreateScreen(QWidget):
 
     def enterDetails(self):
         self.checkDetails()
+
+    def showMapScreen(self):
+        self.close()
