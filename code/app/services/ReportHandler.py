@@ -4,6 +4,8 @@ class ReportHandler:
     def __init__(self, report_id):
         self.report_id = report_id
 
+
+    #refund the user
     def refund(self):
         conn = DB.Database.connect()
         if not conn or not conn.is_connected():
@@ -76,6 +78,7 @@ class ReportHandler:
             cursor.close()
             conn.close()
 
+    #suspend the user
     def suspend_account(self):
         conn = DB.Database.connect()
         if not conn or not conn.is_connected():
@@ -83,7 +86,7 @@ class ReportHandler:
 
         cursor = conn.cursor()
         try:
-            # Πρώτα παίρνουμε ποιος είναι ο reporter, ο owner και ο renter
+            # get the name of the user who made the report and the other user
             query = """
                 SELECT name_reporter, name_of_user, user_who_rents
                 FROM reports 
@@ -98,7 +101,7 @@ class ReportHandler:
 
             name_reporter, owner_username, renter_username = result
 
-            # Επιλέγουμε ποιον να κάνουμε suspend: τον άλλο χρήστη που δεν έκανε report
+            # select the user to suspend
             if name_reporter == renter_username:
                 user_to_suspend = owner_username
             elif name_reporter == owner_username:
@@ -106,7 +109,7 @@ class ReportHandler:
             else:
                 raise Exception("Invalid report: Reporter is neither renter nor owner.")
 
-            # Κάνουμε update το πεδίο is_suspended (πρέπει να υπάρχει στη βάση)
+            # update the user status to 'suspended'
             cursor.execute("""
                 UPDATE user
                 SET status = 'suspended'
@@ -122,6 +125,7 @@ class ReportHandler:
             cursor.close()
             conn.close()
 
+    # ignore the report
     def ignore(self):
         conn = DB.Database.connect()
         if not conn or not conn.is_connected():
@@ -143,8 +147,8 @@ class ReportHandler:
             cursor.close()
             conn.close()
 
+    # complete the report
     def complete_report(self):
-        """Ενημερώνει το status της αναφοράς σε 'complete'."""
         conn = DB.Database.connect()
         if not conn or not conn.is_connected():
             raise Exception("Failed to connect to database.")

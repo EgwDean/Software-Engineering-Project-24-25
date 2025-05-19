@@ -4,7 +4,7 @@ import os
 
 class Graph:
     def __init__(self, data):
-        self.data = data  # data is a list of tuples (brand, model, vehicle_type, status, count)
+        self.data = data
 
     def create_graphs(self):
         html_paths = []
@@ -61,7 +61,7 @@ class Graph:
             plot_bgcolor="white"
         )
 
-        # Save the pie chart as an HTML file
+        # Save the pie chart as an HTML file 
         output_path = f"pie_chart_{index}.html"
         fig.write_html(output_path)
         return output_path

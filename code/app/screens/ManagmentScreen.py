@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QTableWidget, QTableWi
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from screens.AdminDetailsScreen import AdminDetailsScreen 
-from services.ReportHandler import ReportHandler # Εισάγουμε την οθόνη λεπτομερειών
+from services.ReportHandler import ReportHandler 
 
 class ManagmentScreen(QWidget):
     def __init__(self, admin_user):
@@ -14,12 +14,12 @@ class ManagmentScreen(QWidget):
         self.setStyleSheet("background-color: #f0f0f0;")
         self.setFixedSize(900, 520)
 
-        self.selected_report_id = None  # Προσθήκη μεταβλητής για αποθήκευση ID
+        self.selected_report_id = None  # variable to store the selected report ID
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        # === Top menu ===
+        # Top menu 
         top_menu_layout = QHBoxLayout()
         top_menu_layout.setAlignment(Qt.AlignLeft)
 
@@ -64,7 +64,7 @@ class ManagmentScreen(QWidget):
         top_menu_frame.setStyleSheet("background-color: skyblue; padding: 10px;")
         main_layout.addWidget(top_menu_frame)
 
-        # === Table ===
+        # Table
         self.table_widget = QTableWidget()
         self.table_widget.setColumnCount(5)
         self.table_widget.setHorizontalHeaderLabels(["Reporter", "Comment", "Date of Report", "Listing ID", "Status"])
@@ -117,7 +117,7 @@ class ManagmentScreen(QWidget):
 
         self.table_widget.cellClicked.connect(self.handle_row_selection)
 
-        # === Side Panel με κουμπί "More details" ===
+        # side panel
         content_layout = QHBoxLayout()
         content_layout.addWidget(self.table_widget)
 
@@ -145,6 +145,7 @@ class ManagmentScreen(QWidget):
 
         self.load_reports()
 
+    # Load reports from the database
     def load_reports(self):
         self.table_widget.setRowCount(0)
         conn = DB.Database.connect()

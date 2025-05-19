@@ -17,15 +17,15 @@ class AdminDetailsScreen(QWidget):
         self.setStyleSheet("background-color: #f0f0f0;")
         self.setFixedSize(620, 520)
 
-        # Δημιουργούμε instance ReportHandler
+        # instance ReportHandler
         self.report_handler = ReportHandler(self.report_id)
         self.refund_done = False  # Μεταβλητή ελέγχου για refund
 
-        # --- Κύριο κατακόρυφο layout για όλο το παράθυρο ---
+        # layout for window
         main_vertical_layout = QVBoxLayout()
         main_vertical_layout.setContentsMargins(0, 0, 0, 0)
 
-        # === Top menu ===
+        # Top menu
         top_menu_layout = QHBoxLayout()
         top_menu_layout.setAlignment(Qt.AlignLeft)
 
@@ -69,19 +69,19 @@ class AdminDetailsScreen(QWidget):
         top_menu_frame.setLayout(top_menu_layout)
         top_menu_frame.setStyleSheet("background-color: skyblue; padding: 10px;")
 
-        # Προσθέτουμε την μπάρα πρώτα στο κατακόρυφο layout
+        # bar on layout
         main_vertical_layout.addWidget(top_menu_frame)
 
-        # === Δημιουργία οριζόντιου layout για πίνακα αριστερά και κουμπιά δεξιά ===
+        # layout for table
         main_layout = QHBoxLayout()
         main_layout.setContentsMargins(10, 10, 10, 10)
 
-        # === Left layout with report details (πίνακας) ===
+        # Left layout with report details
         left_layout = QVBoxLayout()
         left_layout.setContentsMargins(0, 0, 0, 0)
 
         self.table_widget = QTableWidget()
-        self.table_widget.setRowCount(7)  # 7 γιατί έχει 7 πεδία
+        self.table_widget.setRowCount(7) 
         self.table_widget.setColumnCount(2)
         self.table_widget.setHorizontalHeaderLabels(["Field", "Value"])
         self.table_widget.verticalHeader().setVisible(False)
@@ -125,7 +125,7 @@ class AdminDetailsScreen(QWidget):
 
         left_layout.addWidget(self.table_widget)
 
-        # === Right panel (κουμπιά) ===
+        # Right panel 
         right_panel = QVBoxLayout()
         right_panel.setContentsMargins(20, 20, 20, 20)
         right_panel.setSpacing(20)
@@ -166,14 +166,14 @@ class AdminDetailsScreen(QWidget):
         right_panel.addWidget(self.complete_button)
         right_panel.addStretch()
 
-        # Προσθέτουμε αριστερά τον πίνακα και δεξιά τα κουμπιά στο οριζόντιο layout
+        # Spacer to push buttons to the top
         main_layout.addLayout(left_layout)
         main_layout.addLayout(right_panel)
 
-        # Προσθέτουμε το οριζόντιο layout κάτω από την μπάρα
+        # Add a spacer to the right panel
         main_vertical_layout.addLayout(main_layout)
 
-        # Θέτουμε το κύριο layout του παραθύρου
+
         self.setLayout(main_vertical_layout)
 
         self.load_report_details()
@@ -185,6 +185,7 @@ class AdminDetailsScreen(QWidget):
             self.layout().addWidget(error_label)
             return
 
+        # Fetch report details from the database
         cursor = conn.cursor()
         try:
             query = """
@@ -215,6 +216,7 @@ class AdminDetailsScreen(QWidget):
             cursor.close()
             conn.close()
 
+    
     def handle_refund(self):
         if self.refund_done:
             QMessageBox.warning(self, "Refund Already Processed", "This report has already been refunded.")

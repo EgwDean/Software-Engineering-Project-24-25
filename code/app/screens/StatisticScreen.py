@@ -73,7 +73,7 @@ class StatisticScreen(QWidget):
         top_menu_frame.setStyleSheet("background-color: skyblue; padding: 10px;")
         main_layout.addWidget(top_menu_frame)
 
-        # --- Main Content with Sidebar ---
+        # Main Content with Sidebar 
         content_layout = QHBoxLayout()
 
         # Sidebar with filters
@@ -120,7 +120,7 @@ class StatisticScreen(QWidget):
         """)
         graph_button.clicked.connect(self.show_graph)
 
-        # Προσθήκη του κουμπιού Export Statistics
+        # Export Statistics
         export_button = QPushButton("Export Statistics")
         export_button.setStyleSheet(""" 
             padding: 6px;
@@ -149,7 +149,6 @@ class StatisticScreen(QWidget):
         content_layout.addWidget(sidebar_frame)
 
         # Table
-        # Table (Improved Professional Look)
         self.table_widget = QTableWidget()
         self.table_widget.setColumnCount(5)
         self.table_widget.setHorizontalHeaderLabels(["Brand", "Model", "Vehicle Type", "Status", "Total Listings"])
@@ -281,11 +280,11 @@ class StatisticScreen(QWidget):
                 self.status_input.text().strip()
             )
 
-            # Δημιουργία γραφημάτων με Plotly
+            # create the Graph object and generate graphs
             graph = Graph(results)
-            graph_html_paths = graph.create_graphs()  # HTML files για τα γραφήματα
+            graph_html_paths = graph.create_graphs()  # HTML files 
 
-            # Εμφάνιση των γραφημάτων στην οθόνη
+            # show the graphs in a new window
             self.graph_screen = GraphScreen(graph_html_paths)
             self.graph_screen.show()
 
@@ -296,7 +295,7 @@ class StatisticScreen(QWidget):
 
     def export_statistics(self):
         try:
-            # Παίρνουμε τα αποτελέσματα
+            # get the filtered statistics
             results = FilterStatistics.fetch_statistics(
                 self.brand_input.text().strip(),
                 self.model_input.text().strip(),
@@ -305,16 +304,15 @@ class StatisticScreen(QWidget):
                 self.status_input.text().strip()
             )
 
-            # Άνοιγμα του διαλόγου για επιλογή τοποθεσίας και ονόματος αρχείου
+            # create a file dialog to select the save location
             options = QFileDialog.Options()
             file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv);;All Files (*)", options=options)
 
-            # Ελέγχουμε αν ο χρήστης επέλεξε αρχείο
+            # check if the user selected a file
             if file_path:
-                # Κλήση της κλάσης ExportStatistics για να αποθηκεύσουμε τα δεδομένα
+                # call the ExportStatistics class to save the results
                 ExportStatistics.save_to_csv(results, file_path)
 
-                # Εμφάνιση ενημερωτικού μηνύματος ότι η εξαγωγή ήταν επιτυχής
                 self.show_success_message()
 
         except Exception as e:
@@ -323,7 +321,6 @@ class StatisticScreen(QWidget):
 
 
     def show_success_message(self):
-        # Δημιουργία του QMessageBox για την επιτυχία
         success_msg = QMessageBox(self)
         success_msg.setIcon(QMessageBox.Information)
         success_msg.setWindowTitle("Export Successful")
