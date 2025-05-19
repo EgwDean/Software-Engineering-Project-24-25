@@ -109,7 +109,7 @@ class ReportHandler:
             # Κάνουμε update το πεδίο is_suspended (πρέπει να υπάρχει στη βάση)
             cursor.execute("""
                 UPDATE user
-                SET message = "Account suspended due to report."
+                SET status = 'suspended'
                 WHERE username = %s
             """, (user_to_suspend,))
 
