@@ -83,20 +83,22 @@ class CompletionScreen(QWidget):
         self.showMaximized()
 
     def cancel(self):
+        self._should_empty_temp = True
         self.close()
 
     def closeEvent(self, event):
-        # Empty the temp folder in code/assets/temp when window is closed
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # .../code
-        temp_dir = os.path.join(base_dir, "assets", "temp")
-        if os.path.exists(temp_dir):
-            for filename in os.listdir(temp_dir):
-                file_path = os.path.join(temp_dir, filename)
-                try:
-                    if os.path.isfile(file_path):
-                        os.remove(file_path)
-                except Exception as e:
-                    print(f"Error deleting file {file_path}: {e}")
+        # Only empty temp if self._should_empty_temp is True (set by cancel or X)
+        if getattr(self, "_should_empty_temp", False):
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            temp_dir = os.path.join(base_dir, "assets", "temp")
+            if os.path.exists(temp_dir):
+                for filename in os.listdir(temp_dir):
+                    file_path = os.path.join(temp_dir, filename)
+                    try:
+                        if os.path.isfile(file_path):
+                            os.remove(file_path)
+                    except Exception as e:
+                        print(f"Error deleting file {file_path}: {e}")
         super().closeEvent(event)
 
     def open_pricing_screen(self):
