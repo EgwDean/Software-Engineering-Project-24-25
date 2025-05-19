@@ -16,8 +16,15 @@ class VehicleListing:
         self.to_date = None
         self.status = None
 
+        # Address fields
+        self.country = None
+        self.city = None
+        self.street = None
+        self.number = None
+
         # Fetch vehicle listing data from the database
         self.fetch_listing_data()
+        self.fetch_address_data()
 
     def fetch_listing_data(self):
         """Fetch vehicle listing data from the database."""
@@ -66,3 +73,71 @@ class VehicleListing:
 
         except Exception as e:
             print(f"An error occurred while fetching vehicle listing data: {e}")
+
+    def fetch_address_data(self):
+        """Fetch the address of the user associated with the listing."""
+        try:
+            # Connect to the database
+            db = DB.Database()
+            connection = db.connect()
+
+            if connection is None:
+                print("Failed to connect to the database.")
+                return
+
+            # Query the address table
+            cursor = connection.cursor()
+            query = """
+                SELECT country, city, street, number
+                FROM address
+                WHERE username_address = %s
+            """
+            cursor.execute(query, (self.name_of_user,))
+            result = cursor.fetchone()
+
+            if result:
+                self.country, self.city, self.street, self.number = result
+                print(f"Address data fetched for user {self.name_of_user}: {result}")
+            else:
+                print(f"No address found for user: {self.name_of_user}")
+
+            # Close the cursor and connection
+            cursor.close()
+            connection.close()
+
+        except Exception as e:
+            print(f"An error occurred while fetching address data: {e}")
+
+    def store(self, name_of_user, price_per_day, vehicle_type, brand, model, year,
+              total_km, fuel_type, description, from_date, to_date, status):
+        """
+        Store a new vehicle listing in the database.
+        """
+        try:
+            db = DB.Database()
+            connection = db.connect()
+            if connection is None:
+                print("Failed to connect to the database.")
+                return False
+
+            cursor = connection.cursor()
+            query = """
+                INSERT INTO vehicle_listing (
+                    name_of_user, price_per_day, vehicle_type, brand, model, year,
+                    total_km, fuel_type, description, from_date, to_date, status
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            values = (
+                name_of_user, price_per_day, vehicle_type, brand, model, year,
+                total_km, fuel_type, description, from_date, to_date, status
+            )
+            cursor.execute(query, values)
+            connection.commit()
+            print("Vehicle listing stored successfully.")
+
+            cursor.close()
+            connection.close()
+            return True
+        except Exception as e:
+            print(f"An error occurred while storing vehicle listing: {e}")
+            return False
