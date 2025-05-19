@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (
     QLineEdit, QTextEdit, QComboBox, QDateEdit, QHBoxLayout
 )
 from PyQt5.QtCore import Qt, QDate
+from screens.PhotosScreen import PhotosScreen
 
 class CreateScreen(QWidget):
     def __init__(self, user, parent=None):
@@ -27,6 +28,13 @@ class CreateScreen(QWidget):
         title.setAlignment(Qt.AlignCenter)
         title.setStyleSheet("font-size: 22px; font-weight: bold; margin-bottom: 10px;")
         frame_layout.addWidget(title)
+
+        # Notification label (hidden by default)
+        self.notify_label = QLabel("All fields are required")
+        self.notify_label.setStyleSheet("color: red; font-weight: bold;")
+        self.notify_label.setAlignment(Qt.AlignCenter)
+        self.notify_label.hide()
+        frame_layout.insertWidget(1, self.notify_label)  # Show below the title
 
         # Form
         form_layout = QFormLayout()
@@ -93,7 +101,7 @@ class CreateScreen(QWidget):
         create_btn.setStyleSheet(
             "background-color: skyblue; color: white; font-weight: bold; padding: 8px 24px;"
         )
-        create_btn.clicked.connect(self.create_listing)  # Placeholder
+        create_btn.clicked.connect(self.enterDetails)  # Use enterDetails as handler
 
         button_layout.addWidget(cancel_btn)
         button_layout.addWidget(create_btn)
@@ -106,17 +114,39 @@ class CreateScreen(QWidget):
     def cancel(self):
         self.close()
 
-    def create_listing(self):
-        # Store the info from the fields for now
-        data = {
-            "vehicle_type": self.vehicle_type.text(),
-            "brand": self.brand.text(),
-            "model": self.model.text(),
-            "year": self.year.text(),
-            "total_km": self.total_km.text(),
-            "fuel_type": self.fuel_type.text(),
-            "description": self.description.toPlainText(),
-            "from_date": self.from_date.date().toString("yyyy-MM-dd"),
-            "to_date": self.to_date.date().toString("yyyy-MM-dd"),
-        }
-        print("Form data:", data)
+    def detailsNotify(self):
+        self.notify_label.show()
+
+    def checkDetails(self):
+        # Check if all fields are filled
+        if (
+            not self.vehicle_type.text().strip() or
+            not self.brand.text().strip() or
+            not self.model.text().strip() or
+            not self.year.text().strip() or
+            not self.total_km.text().strip() or
+            not self.fuel_type.text().strip() or
+            not self.description.toPlainText().strip() or
+            not self.from_date.date().isValid() or
+            not self.to_date.date().isValid()
+        ):
+            self.detailsNotify()
+        else:
+            self.notify_label.hide()
+            # Implementation for valid details will go here
+            data = {
+                "vehicle_type": self.vehicle_type.text(),
+                "brand": self.brand.text(),
+                "model": self.model.text(),
+                "year": self.year.text(),
+                "total_km": self.total_km.text(),
+                "fuel_type": self.fuel_type.text(),
+                "description": self.description.toPlainText(),
+                "from_date": self.from_date.date().toString("yyyy-MM-dd"),
+                "to_date": self.to_date.date().toString("yyyy-MM-dd"),
+            }
+            self.photos_screen = PhotosScreen(self.user, data)
+            self.photos_screen.show()
+
+    def enterDetails(self):
+        self.checkDetails()
