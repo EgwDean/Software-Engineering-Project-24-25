@@ -4,6 +4,7 @@ import entities.Admin as AD
 import sys
 from PyQt5.QtWidgets import QApplication
 from screens.LoginPage import LoginPage
+
 # Main function to start the application
 def main():
     app = QApplication(sys.argv)

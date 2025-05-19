@@ -14,6 +14,7 @@ from services.Filter import Filter
 from screens.DetailsScreen import DetailsScreen
 from screens.HistoryPage import HistoryPage
 from screens.ListingsScreen import ListingsScreen
+from screens.CreateScreen import CreateScreen
 
 
 class MapScreen(QWidget):
@@ -116,16 +117,51 @@ class MapScreen(QWidget):
         nav_menu = QVBoxLayout()
         nav_menu.setAlignment(Qt.AlignTop)
 
-        for i in range(5):
-            if i == 0:
-                button = QPushButton("View All Listings")
-                button.clicked.connect(self.open_listings)
-            elif i == 1:
-                button = QPushButton("History")
-                button.clicked.connect(self.open_history)
-            else:
-                button = QPushButton(f"TODO {i + 1}")
+        # View All Listings button
+        view_all_btn = QPushButton("View All Listings")
+        view_all_btn.setStyleSheet("""
+            padding: 10px;
+            font-size: 14px;
+            background-color: skyblue;
+            border: none;
+            color: black;
+            text-align: left;
+            border: 1px solid black;
+        """)
+        view_all_btn.clicked.connect(self.open_listings)
+        nav_menu.addWidget(view_all_btn)
 
+        # History button
+        history_btn = QPushButton("History")
+        history_btn.setStyleSheet("""
+            padding: 10px;
+            font-size: 14px;
+            background-color: skyblue;
+            border: none;
+            color: black;
+            text-align: left;
+            border: 1px solid black;
+        """)
+        history_btn.clicked.connect(self.open_history)
+        nav_menu.addWidget(history_btn)
+
+        # Create Listing button
+        create_btn = QPushButton("Create Listing")
+        create_btn.setStyleSheet("""
+            padding: 10px;
+            font-size: 14px;
+            background-color: skyblue;
+            border: none;
+            color: black;
+            text-align: left;
+            border: 1px solid black;
+        """)
+        create_btn.clicked.connect(self.open_create_screen)
+        nav_menu.addWidget(create_btn)
+
+        # Add any remaining TODO buttons if needed
+        for i in range(2):
+            button = QPushButton(f"TODO {i + 3}")
             button.setStyleSheet("""
                 padding: 10px;
                 font-size: 14px;
@@ -260,6 +296,11 @@ class MapScreen(QWidget):
         from screens.ProfileScreen import ProfileScreen  # Εισάγουμε την ProfileScreen μόνο όταν χρειάζεται
         self.profile_screen = ProfileScreen(self.user, self)  # Δημιουργούμε την ProfileScreen
         self.profile_screen.show()  # Εμφανίζουμε την ProfileScreen
+
+    def open_create_screen(self):
+        from screens.CreateScreen import CreateScreen
+        self.create_screen = CreateScreen(self.user)
+        self.create_screen.show()
 
     def get_coordinates_from_address_string(self, address):
         """Convert an address string to latitude and longitude using a geocoding API."""
