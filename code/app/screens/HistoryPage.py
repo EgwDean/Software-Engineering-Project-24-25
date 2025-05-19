@@ -27,11 +27,20 @@ class HistoryPage(QWidget):
         main_layout.setAlignment(Qt.AlignTop)
 
         # Back button
-        back_btn = QPushButton("←")
-        back_btn.setFixedSize(60, 60)
+        back_btn = QPushButton("Back to Map")
+        back_btn.setFixedSize(120, 40)
         back_btn.setStyleSheet(
-            "QPushButton { background: transparent; border: none; color: skyblue; font-size: 37px; }"
-            "QPushButton:hover { color: deepskyblue; }"
+            "QPushButton {"
+            " background-color: skyblue;"
+            " color: white;"
+            " font-size: 18px;"
+            " border: none;"
+            " border-radius: 8px;"
+            " font-weight: bold;"
+            "}"
+            "QPushButton:hover {"
+            " background-color: #4fc3f7;"
+            "}"
         )
         back_btn.clicked.connect(self.back_requested.emit)
         main_layout.addWidget(back_btn, alignment=Qt.AlignLeft)

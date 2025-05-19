@@ -281,10 +281,10 @@ class MapScreen(QWidget):
 
     def open_history(self):
         """Instantiate and show the HistoryPage."""
-        history_page = HistoryPage(self.user)
-        history_page.back_requested.connect(self.show)
+        self.history_page = HistoryPage(self.user)
+        self.history_page.back_requested.connect(self.show)
         self.hide()
-        history_page.show()
+        self.history_page.show()
 
     def open_listings(self, event=None):
         # Create and show the ListingsScreen window
