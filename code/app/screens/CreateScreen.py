@@ -147,6 +147,7 @@ class CreateScreen(QWidget):
             }
             self.photos_screen = PhotosScreen(self.user, data)
             self.photos_screen.show()
+            self.close()
 
     def enterDetails(self):
         self.checkDetails()
