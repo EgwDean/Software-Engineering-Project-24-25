@@ -9,7 +9,6 @@ from services.Map import Map
 from services.Pin import Pin
 from entities.VehicleListing import VehicleListing
 import services.Database as DB
-from services.Search import Search
 from services.Filter import Filter 
 from screens.DetailsScreen import DetailsScreen
 from screens.HistoryPage import HistoryPage
@@ -192,9 +191,6 @@ class MapScreen(QWidget):
 
         main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
-
-        # Initialize the Search class
-        self.search = Search(self.map_widget)
 
     def get_user_coordinates(self):
         """Fetch the user's address and convert it to coordinates."""
