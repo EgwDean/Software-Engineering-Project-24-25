@@ -34,7 +34,6 @@ class Database:
         
         return None
 
-
     @classmethod
     def close(cls):
         if cls.connection and cls.connection.is_connected():

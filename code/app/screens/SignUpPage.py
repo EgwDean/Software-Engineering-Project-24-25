@@ -8,6 +8,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGraphicsDropShadowEffect
 from pathlib import Path
+from screens.MapScreen import MapScreen  # Import the MapScreen class
+import entities.StandardUser as SU  # Import the StandardUser entity
 
 
 class SignUpPage(QWidget):
@@ -103,6 +105,12 @@ class SignUpPage(QWidget):
         self.street_input.setStyleSheet("padding: 8px; font-size: 14px;")
         frame_layout.addWidget(self.street_input)
 
+        # Number field
+        self.number_input = QLineEdit()
+        self.number_input.setPlaceholderText("Number")
+        self.number_input.setStyleSheet("padding: 8px; font-size: 14px;")
+        frame_layout.addWidget(self.number_input)
+
         # Error message label
         self.error_label = QLabel("")
         self.error_label.setStyleSheet("color: red; font-size: 12px; border: none;")
@@ -171,8 +179,9 @@ class SignUpPage(QWidget):
         country = self.country_input.text().strip()
         city = self.city_input.text().strip()
         street = self.street_input.text().strip()
+        number = self.number_input.text().strip()
 
-        if not all([username, password, phone, email, country, city, street]):
+        if not all([username, password, phone, email, country, city, street, number]):
             self.error_label.setText("All fields are required!")
             return
 
@@ -194,10 +203,10 @@ class SignUpPage(QWidget):
 
             # Insert address into the address table
             address_query = """
-                INSERT INTO address (username_address, country, city, street)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO address (username_address, country, city, street, number)
+                VALUES (%s, %s, %s, %s, %s)
             """
-            cursor.execute(address_query, (username, country, city, street))
+            cursor.execute(address_query, (username, country, city, street, number))
 
             # Commit the transaction
             self.db_connection.commit()
@@ -208,6 +217,13 @@ class SignUpPage(QWidget):
             # Success message
             self.error_label.setStyleSheet("color: green; font-size: 12px; border: none;")
             self.error_label.setText("Account created successfully!")
+
+            # Open the MapScreen
+            self.map_screen = MapScreen(SU.StandardUser(username))  # Pass the user object to MapScreen
+            self.map_screen.show()  # Show the MapScreen
+
+            # Close the SignUpPage window
+            self.close()
 
         except Exception as e:
             print(f"An error occurred during sign-up: {e}")
