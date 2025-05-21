@@ -313,8 +313,16 @@ class MapScreen(QWidget):
         self.create_screen.show()
 
     def open_subscription_screen(self):
-        from screens.SubscriptionScreen import SubscriptionScreen
-        self.subscription_screen = SubscriptionScreen(self.user)
+        from screens.SubPackagesScreen import SubPackagesScreen
+        from screens.MySubscriptionsScreen import MySubscriptionsScreen
+        from services.ManageSubsClass import ManageSubsClass
+
+        subs_manager = ManageSubsClass()
+        has_active = subs_manager.has_active_subscription(self.user.username)
+        if has_active:
+            self.subscription_screen = MySubscriptionsScreen(self.user)
+        else:
+            self.subscription_screen = SubPackagesScreen(self.user)
         self.subscription_screen.show()
 
     def get_coordinates_from_address_string(self, address):
