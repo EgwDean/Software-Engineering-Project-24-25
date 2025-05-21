@@ -158,9 +158,23 @@ class MapScreen(QWidget):
         create_btn.clicked.connect(self.open_create_screen)
         nav_menu.addWidget(create_btn)
 
+        # Subscription button
+        subscription_btn = QPushButton("Subscription")
+        subscription_btn.setStyleSheet("""
+            padding: 10px;
+            font-size: 14px;
+            background-color: skyblue;
+            border: none;
+            color: black;
+            text-align: left;
+            border: 1px solid black;
+        """)
+        subscription_btn.clicked.connect(self.open_subscription_screen)
+        nav_menu.addWidget(subscription_btn)
+
         # Add any remaining TODO buttons if needed
-        for i in range(2):
-            button = QPushButton(f"TODO {i + 3}")
+        for i in range(1):
+            button = QPushButton(f"TODO {i + 4}")
             button.setStyleSheet("""
                 padding: 10px;
                 font-size: 14px;
@@ -297,6 +311,11 @@ class MapScreen(QWidget):
         from screens.CreateScreen import CreateScreen
         self.create_screen = CreateScreen(self.user)
         self.create_screen.show()
+
+    def open_subscription_screen(self):
+        from screens.SubscriptionScreen import SubscriptionScreen
+        self.subscription_screen = SubscriptionScreen(self.user)
+        self.subscription_screen.show()
 
     def get_coordinates_from_address_string(self, address):
         """Convert an address string to latitude and longitude using a geocoding API."""
