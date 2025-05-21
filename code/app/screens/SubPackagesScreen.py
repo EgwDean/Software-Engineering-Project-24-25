@@ -149,11 +149,8 @@ class SubPackagesScreen(QWidget):
     def on_payment_method_selected(self, method):
         dlg = PaymentDetailsScreen(self.user, self.selected_package, method, self)
         if dlg.exec_() == dlg.Accepted:
-            # Proceed with payment processing and subscription creation
-            QMessageBox.information(self, "Success", "Payment details entered successfully!")
-            # Continue to next step (e.g., confirm subscription)
-        else:
-            QMessageBox.warning(self, "Cancelled", "Payment was cancelled.")
+            # Optionally handle post-payment logic here
+            pass
 
     def on_payment_details_entered(self, details):
         if not self.validate_payment_details(details):

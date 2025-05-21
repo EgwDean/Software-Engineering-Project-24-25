@@ -102,7 +102,12 @@ class PaymentDetailsScreen(QDialog):
             # Show confirmation
             confirm_screen = ConfirmSubscriptionScreen(self.user, self.selected_package)
             confirm_screen.exec_()
-            self.accept()
+            if self.parent():
+                self.parent().close()  # Close SubPackagesScreen if this dialog was opened from it
+            from screens.MySubscriptionsScreen import MySubscriptionsScreen
+            self.close()  # Close PaymentDetailsScreen itself
+            self.sub_screen = MySubscriptionsScreen(self.user)
+            self.sub_screen.show()
         else:
             dlg = InadequateBalanceScreen(self)
             dlg.exec_()

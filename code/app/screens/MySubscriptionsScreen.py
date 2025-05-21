@@ -66,7 +66,7 @@ class MySubscriptionsScreen(QWidget):
             card_layout.setContentsMargins(16, 16, 16, 16)
 
             plan_label = QLabel(f"Subscription: {sub['plan']}")
-            plan_label.setStyleSheet("font-size: 28px; font-weight: bold; color: #2a3f54;")
+            plan_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #2a3f54;")
             plan_label.setAlignment(Qt.AlignCenter)
 
             price_label = QLabel(f"Price: €{sub['price']}")
