@@ -1,13 +1,18 @@
+# screens/HistoryPage.py
+
+import services.Database as DB
+from pathlib import Path
+
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QPushButton, QScrollArea,
     QHBoxLayout, QFrame, QSizePolicy, QMessageBox, QComboBox, QDateEdit
 )
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, pyqtSignal, QDate
-from pathlib import Path
-import services.Database as DB
+
 from screens.ReviewPage import ReviewPage
 from screens.ReportPage import ReportPage
+
 
 class HistoryPage(QWidget):
     back_requested = pyqtSignal()
@@ -17,8 +22,6 @@ class HistoryPage(QWidget):
         self.user = user
         self.setWindowTitle("Rental History")
         self.setStyleSheet("background-color: #f5f5f5;")
-        self.showMaximized()
-
         self.assets_dir = Path(__file__).parent.parent.parent / 'assets'
         self._init_ui()
 
@@ -30,16 +33,18 @@ class HistoryPage(QWidget):
         back_btn = QPushButton("←")
         back_btn.setFixedSize(60, 60)
         back_btn.setStyleSheet(
-            "QPushButton { background: transparent; border: none; color: skyblue; font-size: 37px; }"
+            "QPushButton { background: transparent; border: none;"
+            " color: skyblue; font-size: 37px; }"
             "QPushButton:hover { color: deepskyblue; }"
         )
-        back_btn.clicked.connect(self.back_requested.emit)
+        back_btn.clicked.connect(self._go_back)
         main_layout.addWidget(back_btn, alignment=Qt.AlignLeft)
 
         # Title
         title = QLabel(f"{self.user.username}'s Rental History")
         title.setStyleSheet(
-            "font-size: 32px; font-weight: bold; color: #333; padding: 20px 0;"
+            "font-size: 32px; font-weight: bold;"
+            " color: #333; padding: 20px 0;"
         )
         main_layout.addWidget(title)
 
@@ -56,33 +61,31 @@ class HistoryPage(QWidget):
         self.sort_combo.setStyleSheet("font-size: 14px; padding: 4px;")
         controls.addWidget(self.sort_combo)
 
-        # Date range
+        # From date
         controls.addWidget(QLabel("From:"))
         self.date_from = QDateEdit(calendarPopup=True)
         self.date_from.setDate(QDate.currentDate().addYears(-3))
         controls.addWidget(self.date_from)
 
+        # To date
         controls.addWidget(QLabel("To:"))
         self.date_to = QDateEdit(calendarPopup=True)
         self.date_to.setDate(QDate.currentDate())
         controls.addWidget(self.date_to)
 
-        # Apply
+        # Apply button
         apply_btn = QPushButton("Apply")
         apply_btn.setStyleSheet(
-            "QPushButton { background-color: #2196F3; color: white; padding: 6px 12px;"
-            " border-radius: 4px; }"
+            "QPushButton { background-color: #2196F3; color: white;"
+            " padding: 6px 12px; border-radius: 4px; }"
             "QPushButton:hover { background-color: #1976D2; }"
         )
         apply_btn.clicked.connect(self._apply_filter_and_sort)
         controls.addWidget(apply_btn)
 
-        controls_container = QWidget()
-        controls_container.setLayout(controls)
-        controls_container.setStyleSheet("margin: 10px 0;")
-        main_layout.addWidget(controls_container)
+        main_layout.addLayout(controls)
 
-        # Scroll area
+        # Scroll area for the results
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
         container = QWidget()
@@ -93,30 +96,32 @@ class HistoryPage(QWidget):
         # Initial load
         self._apply_filter_and_sort()
 
-    def _apply_filter_and_sort(self):
-        # clear
-        for i in reversed(range(self.content_layout.count())):
-            w = self.content_layout.itemAt(i).widget()
-            if w:
-                w.setParent(None)
+    def _go_back(self):
+        self.back_requested.emit()
+        self.close()
 
-        # fetch with date range
+    def _apply_filter_and_sort(self):
+        # Clear existing items
+        while self.content_layout.count():
+            item = self.content_layout.takeAt(0)
+            w = item.widget()
+            if w:
+                w.deleteLater()
+
+        # Fetch rentals between dates
         from_date = self.date_from.date().toString("yyyy-MM-dd")
         to_date   = self.date_to.date().toString("yyyy-MM-dd")
         rentals = self._fetch_rentals(from_date, to_date)
 
-        # sort in Python
+        # Sort
         key = self.sort_combo.currentText()
-        if "Date ↑" in key:
-            rentals.sort(key=lambda x: x['from_date'])
-        elif "Date ↓" in key:
-            rentals.sort(key=lambda x: x['from_date'], reverse=True)
-        elif "Duration ↑" in key:
-            rentals.sort(key=lambda x: x['number_of_days'])
-        elif "Duration ↓" in key:
-            rentals.sort(key=lambda x: x['number_of_days'], reverse=True)
+        reverse = "↓" in key
+        if "Date" in key:
+            rentals.sort(key=lambda x: x['from_date'], reverse=reverse)
+        else:
+            rentals.sort(key=lambda x: x['number_of_days'], reverse=reverse)
 
-        # display
+        # Display each rental
         for r in rentals:
             self.content_layout.addWidget(self._create_rental_box(r))
         self.content_layout.addStretch()
@@ -128,7 +133,8 @@ class HistoryPage(QWidget):
             cur = conn.cursor(dictionary=True)
             cur.execute(
                 """
-                SELECT v.id, v.brand, v.model, v.year, r.from_date, r.number_of_days
+                SELECT v.id, v.brand, v.model, v.year,
+                       r.from_date, r.number_of_days
                   FROM rents r
                   JOIN vehicle_listing v ON r.id_of_listing = v.id
                  WHERE r.user_who_rents = %s
@@ -141,9 +147,48 @@ class HistoryPage(QWidget):
             conn.close()
         return rentals
 
+    def _create_rental_box(self, rental):
+        box = QFrame()
+        box.setStyleSheet(
+            "QFrame { background-color: #ffffff; border: 1px solid #e0e0e0;"
+            " border-radius: 12px; padding: 20px; margin: 10px 0; }"
+        )
+        box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        layout = QHBoxLayout(box)
+
+        # Rental image
+        img_label = QLabel()
+        img_label.setFixedSize(100, 100)
+        img_label.setScaledContents(True)
+        img_path = self.assets_dir / "images" / f"img_{rental['id']}_1.jpg"
+        pix = QPixmap(str(img_path)) if img_path.exists() else QPixmap(str(self.assets_dir / 'logo_1.png'))
+        img_label.setPixmap(pix)
+        layout.addWidget(img_label)
+
+        # Info section
+        info = QVBoxLayout()
+        info.addWidget(QLabel(f"<b>{rental['brand']} {rental['model']} ({rental['year']})</b>"))
+        info.addWidget(QLabel(f"<i>Rented on: {rental['from_date']}</i>"))
+        info.addWidget(QLabel(f"<i>Duration: {rental['number_of_days']} days</i>"))
+        layout.addLayout(info)
+
+        # Action buttons
+        actions = QVBoxLayout()
+        btn_review = QPushButton("Write a Review")
+        btn_review.clicked.connect(lambda _, r=rental: self._open_review(r))
+        actions.addWidget(btn_review)
+
+        btn_report = QPushButton("Report Issue")
+        btn_report.clicked.connect(lambda _, r=rental: self._open_report(r))
+        actions.addWidget(btn_report)
+
+        layout.addLayout(actions)
+        return box
+
     def _has_reviewed(self, listing_id):
         conn = DB.Database.connect()
-        if not conn: return False
+        if not conn:
+            return False
         try:
             cur = conn.cursor()
             cur.execute(
@@ -156,7 +201,8 @@ class HistoryPage(QWidget):
 
     def _has_reported(self, listing_id):
         conn = DB.Database.connect()
-        if not conn: return False
+        if not conn:
+            return False
         try:
             cur = conn.cursor()
             cur.execute(
@@ -166,54 +212,6 @@ class HistoryPage(QWidget):
             return cur.fetchone() is not None
         finally:
             conn.close()
-
-    def _create_rental_box(self, rental):
-        box = QFrame()
-        box.setStyleSheet(
-            "QFrame { background-color: #ffffff; border: 1px solid #e0e0e0;"
-            " border-radius: 12px; padding: 20px; margin: 10px 0; }"
-        )
-        box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        hbox = QHBoxLayout(box)
-
-        # image
-        img = QLabel()
-        img.setFixedSize(100, 100)
-        img.setScaledContents(True)
-        img_file = self.assets_dir / "images" / f"img_{rental['id']}_1.jpg"
-        pix = QPixmap(str(img_file)) if img_file.exists() else QPixmap(str(self.assets_dir / 'logo_1.png'))
-        img.setPixmap(pix)
-        hbox.addWidget(img)
-
-        # info
-        info = QVBoxLayout()
-        info.addWidget(QLabel(f"<b>{rental['brand']} {rental['model']} ({rental['year']})</b>"))
-        info.addWidget(QLabel(f"<i>Rented on: {rental['from_date']}</i>"))
-        info.addWidget(QLabel(f"<i>Duration: {rental['number_of_days']} days</i>"))
-        hbox.addLayout(info)
-
-        # actions
-        btn_layout = QVBoxLayout()
-        btn_review = QPushButton("Write a Review")
-        btn_review.setStyleSheet(
-            "QPushButton { background-color: #4CAF50; color: white; padding: 8px 16px;"
-            " border-radius: 5px; font-weight: bold; border: none; }"
-            "QPushButton:hover { background-color: #45a049; }"
-        )
-        btn_review.clicked.connect(lambda _,r=rental: self._open_review(r))
-        btn_layout.addWidget(btn_review)
-
-        btn_report = QPushButton("Report Issue")
-        btn_report.setStyleSheet(
-            "QPushButton { background-color: #f44336; color: white; padding: 8px 16px;"
-            " border-radius: 5px; font-weight: bold; border: none; }"
-            "QPushButton:hover { background-color: #e53935; }"
-        )
-        btn_report.clicked.connect(lambda _,r=rental: self._open_report(r))
-        btn_layout.addWidget(btn_report)
-
-        hbox.addLayout(btn_layout)
-        return box
 
     def _open_review(self, rental):
         if self._has_reviewed(rental['id']):
