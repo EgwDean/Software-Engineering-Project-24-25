@@ -33,11 +33,6 @@ class HistoryPage(QWidget):
         back_btn = QPushButton("Back to Map")
         back_btn.setFixedSize(120, 40)
         back_btn.setStyleSheet(
-<<<<<<< HEAD
-            "QPushButton { background: transparent; border: none;"
-            " color: skyblue; font-size: 37px; }"
-            "QPushButton:hover { color: deepskyblue; }"
-=======
             "QPushButton {"
             " background-color: skyblue;"
             " color: white;"
@@ -49,7 +44,6 @@ class HistoryPage(QWidget):
             "QPushButton:hover {"
             " background-color: #4fc3f7;"
             "}"
->>>>>>> 9238ea5b4481ba871752a2ab4c7ffd260dc99b74
         )
         back_btn.clicked.connect(self._go_back)
         main_layout.addWidget(back_btn, alignment=Qt.AlignLeft)
