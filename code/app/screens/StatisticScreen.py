@@ -118,7 +118,7 @@ class StatisticScreen(QWidget):
             border: none;
             border-radius: 4px;
         """)
-        graph_button.clicked.connect(self.show_graph)
+        graph_button.clicked.connect(self.showGraph)
 
         # Export Statistics
         export_button = QPushButton("Export Statistics")
@@ -130,7 +130,7 @@ class StatisticScreen(QWidget):
             border: none;
             border-radius: 4px;
         """)
-        export_button.clicked.connect(self.export_statistics)
+        export_button.clicked.connect(self.exportData)
 
         sidebar_layout.addWidget(self.brand_input)
         sidebar_layout.addWidget(self.model_input)
@@ -211,8 +211,8 @@ class StatisticScreen(QWidget):
     def filter(self, brand_filter="", model_filter="", date_filter="", vehicle_type_filter="", status_filter=""):
         self.table_widget.setRowCount(0)
         try:
-            results = FilterStatistics.fetch_statistics(brand_filter, model_filter, date_filter, vehicle_type_filter, status_filter)
-            self.display_statistics(results)
+            results = FilterStatistics.fetchStatistics(brand_filter, model_filter, date_filter, vehicle_type_filter, status_filter)
+            self.displayStatistics(results)
         except Exception as e:
             error_label = QLabel(f"Error: {e}")
             self.layout().addWidget(error_label)
@@ -225,7 +225,7 @@ class StatisticScreen(QWidget):
         status = self.status_input.text().strip()
         self.filter(brand_filter=brand, model_filter=model, date_filter=date, vehicle_type_filter=vehicle_type, status_filter=status)
 
-    def display_statistics(self, results):
+    def displayStatistics(self, results):
         # Populate the table with the results
         self.table_widget.setRowCount(len(results))
         for row_index, row_data in enumerate(results):
@@ -270,9 +270,9 @@ class StatisticScreen(QWidget):
     def do_nothing(self, event):
         pass
 
-    def show_graph(self):
+    def showGraph(self):
         try:
-            results = FilterStatistics.fetch_statistics(
+            results = FilterStatistics.fetchStatistics(
                 self.brand_input.text().strip(),
                 self.model_input.text().strip(),
                 self.date_input.text().strip(),
@@ -293,10 +293,10 @@ class StatisticScreen(QWidget):
             self.layout().addWidget(error_label)
 
 
-    def export_statistics(self):
+    def exportData(self):
         try:
             # get the filtered statistics
-            results = FilterStatistics.fetch_statistics(
+            results = FilterStatistics.fetchStatistics(
                 self.brand_input.text().strip(),
                 self.model_input.text().strip(),
                 self.date_input.text().strip(),

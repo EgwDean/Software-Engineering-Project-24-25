@@ -106,7 +106,7 @@ class MenuScreen(QWidget):
             color: white;
             text-align: left;
         """)
-        report_button.clicked.connect(self.report_handling)
+        report_button.clicked.connect(self.reportHandling)
 
         report_button_frame = QFrame()
         report_button_frame.setStyleSheet("border: 2px solid #ccc; padding: 5px; border-radius: 5px;")
@@ -199,11 +199,11 @@ class MenuScreen(QWidget):
                 if coords:
                     pin = Pin(latitude=coords[0], longitude=coords[1], title=f"Listing ID: {listing.id}")
                     # Fix: lambda expects no arguments
-                    pin.clicked.connect(lambda l_id=listing.id: self.reportHandling(l_id))
+                    pin.clicked.connect(lambda l_id=listing.id: self.open_details_screen(l_id))
                     self.map_widget.place(pin)
 
     # open details screen if clicked 
-    def reportHandling(self, listing_id):
+    def open_details_screen(self, listing_id):
         """Open the DetailsScreen window for the selected listing."""
         self.details_window = DetailsScreen(listing_id, user=self.admin_user)
         self.details_window.show()
@@ -244,7 +244,7 @@ class MenuScreen(QWidget):
         pass
 
     # open report handling screen
-    def report_handling(self):
+    def reportHandling(self):
         print("Report Handling is clicked!")
         self.admin_window = ManagmentScreen(AD.Admin(self.admin_user.username))
         self.admin_window.show()

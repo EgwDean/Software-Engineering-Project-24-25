@@ -2,7 +2,7 @@ import services.Database as DB
 
 class FilterStatistics:
     @staticmethod
-    def fetch_statistics(brand="", model="", date="", vehicle_type="", status=""):
+    def fetchStatistics(brand="", model="", date="", vehicle_type="", status=""):
         conn = DB.Database.connect()
         if conn and conn.is_connected():
             cursor = conn.cursor()
