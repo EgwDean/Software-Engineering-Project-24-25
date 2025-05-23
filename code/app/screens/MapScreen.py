@@ -157,8 +157,9 @@ class MapScreen(QWidget):
         """)
         create_btn.clicked.connect(self.open_create_screen)
         nav_menu.addWidget(create_btn)
-
-        # Subscription button
+        
+        
+         # Subscription button
         subscription_btn = QPushButton("Subscription")
         subscription_btn.setStyleSheet("""
             padding: 10px;
@@ -185,6 +186,7 @@ class MapScreen(QWidget):
                 border: 1px solid black;
             """)
             nav_menu.addWidget(button)
+
 
         nav_menu.addStretch()
 
@@ -281,8 +283,8 @@ class MapScreen(QWidget):
                 if coords:
                     pin = Pin(latitude=coords[0], longitude=coords[1], title=f"Listing ID: {listing.id}")
                     # Fix: lambda expects no arguments
-                    pin.clicked.connect(lambda l_id=listing.id: self.open_details_screen(l_id))
                     self.map_widget.place(pin)
+                    pin.clicked.connect(lambda l_id=listing.id: self.open_details_screen(l_id))
 
     def open_details_screen(self, listing_id):
         """Open the DetailsScreen window for the selected listing."""
@@ -311,19 +313,6 @@ class MapScreen(QWidget):
         from screens.CreateScreen import CreateScreen
         self.create_screen = CreateScreen(self.user)
         self.create_screen.show()
-
-    def open_subscription_screen(self):
-        from screens.SubPackagesScreen import SubPackagesScreen
-        from screens.MySubscriptionsScreen import MySubscriptionsScreen
-        from services.ManageSubsClass import ManageSubsClass
-
-        subs_manager = ManageSubsClass()
-        has_active = subs_manager.has_active_subscription(self.user.username)
-        if has_active:
-            self.subscription_screen = MySubscriptionsScreen(self.user)
-        else:
-            self.subscription_screen = SubPackagesScreen(self.user)
-        self.subscription_screen.show()
 
     def get_coordinates_from_address_string(self, address):
         """Convert an address string to latitude and longitude using a geocoding API."""
@@ -367,3 +356,18 @@ class MapScreen(QWidget):
         self.map_widget.clear_pins()  # Clear existing pins on the map
         self.place_pins()  # Place all pins again
         print("Filters cleared and pins reloaded.")
+        
+        
+        
+     def open_subscription_screen(self):
+        from screens.SubPackagesScreen import SubPackagesScreen
+        from screens.MySubscriptionsScreen import MySubscriptionsScreen
+        from services.ManageSubsClass import ManageSubsClass
+
+        subs_manager = ManageSubsClass()
+        has_active = subs_manager.has_active_subscription(self.user.username)
+        if has_active:
+            self.subscription_screen = MySubscriptionsScreen(self.user)
+        else:
+            self.subscription_screen = SubPackagesScreen(self.user)
+        self.subscription_screen.show()

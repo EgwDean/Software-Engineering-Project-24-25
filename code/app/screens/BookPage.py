@@ -54,7 +54,7 @@ class BookPage(QWidget):
             "QPushButton { background: transparent; border: none; color: skyblue; font-size: 36px; }"
             "QPushButton:hover { color: deepskyblue; }"
         )
-        back_btn.clicked.connect(self.back_requested.emit)
+        back_btn.clicked.connect(self.close)
         top_bar.addWidget(back_btn)
         top_bar.addStretch()
         balance_lbl = QLabel(f"Balance: €{self.user.balance:.2f}")
