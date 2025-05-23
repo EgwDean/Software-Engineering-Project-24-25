@@ -67,14 +67,20 @@ class Filter(QDialog):
             cursor = connection.cursor()
 
             # Populate vehicle type
+            self.vehicle_type.clear()
+            self.vehicle_type.addItem("Any")
             cursor.execute("SELECT DISTINCT vehicle_type FROM vehicle_listing")
             self.vehicle_type.addItems([row[0] for row in cursor.fetchall()])
 
             # Populate brand
+            self.brand.clear()
+            self.brand.addItem("Any")
             cursor.execute("SELECT DISTINCT brand FROM vehicle_listing")
             self.brand.addItems([row[0] for row in cursor.fetchall()])
 
             # Populate model
+            self.model.clear()
+            self.model.addItem("Any")
             cursor.execute("SELECT DISTINCT model FROM vehicle_listing")
             self.model.addItems([row[0] for row in cursor.fetchall()])
 
@@ -131,13 +137,13 @@ class Filter(QDialog):
             if filters["max_km"]:
                 query += " AND total_km <= %s"
                 params.append(filters["max_km"])
-            if filters["vehicle_type"]:
+            if filters["vehicle_type"] and filters["vehicle_type"] != "Any":
                 query += " AND vehicle_type = %s"
                 params.append(filters["vehicle_type"])
-            if filters["brand"]:
+            if filters["brand"] and filters["brand"] != "Any":
                 query += " AND brand = %s"
                 params.append(filters["brand"])
-            if filters["model"]:
+            if filters["model"] and filters["model"] != "Any":
                 query += " AND model = %s"
                 params.append(filters["model"])
 
@@ -155,6 +161,8 @@ class Filter(QDialog):
                 coords = self.get_coordinates_from_address_string(address)
                 if coords:
                     pin = Pin(latitude=coords[0], longitude=coords[1], title=f"Listing ID: {row[0]}")
+                    # Connect the click event to open_details_screen
+                    pin.clicked.connect(lambda *args, l_id=row[0]: self.parent().open_details_screen(l_id))
                     self.map_widget.place(pin)
 
             cursor.close()
