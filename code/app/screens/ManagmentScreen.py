@@ -182,15 +182,15 @@ class ManagmentScreen(QWidget):
             cursor.close()
             conn.close()
 
+    # when a row is selected, the more details button is shown
     def handle_row_selection(self, row, column):
         item = self.table_widget.item(row, 3)  # Listing ID
         if item:
             self.selected_report_id = item.text()
             self.more_details_button.setVisible(True)
 
-
+    # go to the details screen
     def handle_more_details(self):
-
         self.report_handler = ReportHandler(self.selected_report_id)
         self.details_screen = AdminDetailsScreen(self.admin_user, self.selected_report_id)
         self.details_screen.show()

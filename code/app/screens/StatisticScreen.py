@@ -319,7 +319,7 @@ class StatisticScreen(QWidget):
             error_label = QLabel(f"Error: {e}")
             self.layout().addWidget(error_label)
 
-
+    # show success message after exporting
     def show_success_message(self):
         success_msg = QMessageBox(self)
         success_msg.setIcon(QMessageBox.Information)

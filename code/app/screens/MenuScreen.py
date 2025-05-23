@@ -159,6 +159,7 @@ class MenuScreen(QWidget):
         return 38.246639, 21.734573  # Default to Patras center
         
 
+    # fetch listings from the database
     def fetch_listings(self):
         """Fetch all listings from the database and create VehicleListing instances."""
         try:
@@ -187,6 +188,7 @@ class MenuScreen(QWidget):
         except Exception as e:
             print(f"An error occurred while fetching listings: {e}")
 
+    # place pins on the map
     def place_pins(self):
         """Convert addresses to coordinates and place pins on the map."""
         for listing in self.listings:
@@ -200,13 +202,14 @@ class MenuScreen(QWidget):
                     pin.clicked.connect(lambda l_id=listing.id: self.open_details_screen(l_id))
                     self.map_widget.place(pin)
 
+    # open details screen if clicked 
     def open_details_screen(self, listing_id):
         """Open the DetailsScreen window for the selected listing."""
         self.details_window = DetailsScreen(listing_id, user=self.admin_user)
         self.details_window.show()
 
 
-
+    # convert address to coordinates using geocoding API
     def get_coordinates_from_address_string(self, address):
         """Convert an address string to latitude and longitude using a geocoding API."""
         try:
@@ -224,12 +227,13 @@ class MenuScreen(QWidget):
         return None
 
 
-
+    # reload the page when logo is clicked
     def reload_page(self, event):
         self.close()
         self.__init__(self.admin_user)
         self.show()
 
+    # logout and go back to login page
     def logout(self):
         from screens.LoginPage import LoginPage
         self.login_page = LoginPage()
@@ -239,12 +243,14 @@ class MenuScreen(QWidget):
     def do_nothing(self, event):
         pass
 
+    # open report handling screen
     def report_handling(self):
         print("Report Handling is clicked!")
         self.admin_window = ManagmentScreen(AD.Admin(self.admin_user.username))
         self.admin_window.show()
         self.close()
-
+    
+    # open statistics screen    
     def displayStatisticScreen(self):
         print("View Statistics is clicked!")
         self.admin_window = StatisticScreen(AD.Admin(self.admin_user.username))
