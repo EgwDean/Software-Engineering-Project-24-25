@@ -267,8 +267,8 @@ class MapScreen(QWidget):
                 if coords:
                     pin = Pin(latitude=coords[0], longitude=coords[1], title=f"Listing ID: {listing.id}")
                     # Fix: lambda expects no arguments
-                    pin.clicked.connect(lambda l_id=listing.id: self.open_details_screen(l_id))
                     self.map_widget.place(pin)
+                    pin.clicked.connect(lambda l_id=listing.id: self.open_details_screen(l_id))
 
     def open_details_screen(self, listing_id):
         """Open the DetailsScreen window for the selected listing."""
