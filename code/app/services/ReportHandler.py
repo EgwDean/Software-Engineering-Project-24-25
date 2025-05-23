@@ -79,7 +79,7 @@ class ReportHandler:
             conn.close()
 
     #suspend the user
-    def suspend_account(self):
+    def suspendAccount(self):
         conn = DB.Database.connect()
         if not conn or not conn.is_connected():
             raise Exception("Database connection failed.")
@@ -148,7 +148,7 @@ class ReportHandler:
             conn.close()
 
     # complete the report
-    def complete_report(self):
+    def completeReport(self):
         conn = DB.Database.connect()
         if not conn or not conn.is_connected():
             raise Exception("Failed to connect to database.")

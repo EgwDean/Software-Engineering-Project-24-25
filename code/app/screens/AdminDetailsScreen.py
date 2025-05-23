@@ -143,22 +143,22 @@ class AdminDetailsScreen(QWidget):
         self.refund_button = QPushButton("Refund")
         self.refund_button.setStyleSheet(btn_style)
         self.refund_button.setCursor(Qt.PointingHandCursor)
-        self.refund_button.clicked.connect(self.handle_refund)
+        self.refund_button.clicked.connect(self.handleRefund)
 
         self.suspend_button = QPushButton("Suspend Account")
         self.suspend_button.setStyleSheet(btn_style)
         self.suspend_button.setCursor(Qt.PointingHandCursor)
-        self.suspend_button.clicked.connect(self.handle_suspend)
+        self.suspend_button.clicked.connect(self.handleSuspend)
 
         self.ignore_button = QPushButton("Ignore")
         self.ignore_button.setStyleSheet(btn_style)
         self.ignore_button.setCursor(Qt.PointingHandCursor)
-        self.ignore_button.clicked.connect(self.handle_ignore)
+        self.ignore_button.clicked.connect(self.handleIgnore)
 
         self.complete_button = QPushButton("Complete")
         self.complete_button.setStyleSheet(btn_style)
         self.complete_button.setCursor(Qt.PointingHandCursor)
-        self.complete_button.clicked.connect(self.handle_complete)
+        self.complete_button.clicked.connect(self.handleComplete)
 
         right_panel.addWidget(self.refund_button)
         right_panel.addWidget(self.suspend_button)
@@ -176,10 +176,10 @@ class AdminDetailsScreen(QWidget):
 
         self.setLayout(main_vertical_layout)
 
-        self.load_report_details()
+        self.fetchDetails()
 
     #get the report details from the database
-    def load_report_details(self):
+    def fetchDetails(self):
         conn = DB.Database.connect()
         if not conn or not conn.is_connected():
             error_label = QLabel("Error: Cannot connect to the database")
@@ -218,7 +218,7 @@ class AdminDetailsScreen(QWidget):
             conn.close()
 
     # handle the refund button, call the handler
-    def handle_refund(self):
+    def handleRefund(self):
         if self.refund_done:
             QMessageBox.warning(self, "Refund Already Processed", "This report has already been refunded.")
             return
@@ -229,15 +229,15 @@ class AdminDetailsScreen(QWidget):
         QMessageBox.information(self, "Refund Successful", "The refund was successfully processed.")
 
     # handle the suspend button, call the handler
-    def handle_suspend(self):
+    def handleSuspend(self):
         try:
-            self.report_handler.suspend_account()
+            self.report_handler.suspendAccount()
             QMessageBox.information(self, "Account Suspended", "The related user account has been suspended.")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to suspend account: {e}")
 
     # handle the ignore button, call the handler
-    def handle_ignore(self):
+    def handleIgnore(self):
         try:
             self.report_handler.ignore()
             QMessageBox.information(self, "Report Ignored", f"Report {self.report_id} marked as ignored.")
@@ -249,9 +249,9 @@ class AdminDetailsScreen(QWidget):
             QMessageBox.critical(self, "Error", f"Failed to ignore report: {e}")
 
     # handle the complete button, call the handler
-    def handle_complete(self):
+    def handleComplete(self):
         try:
-            self.report_handler.complete_report()
+            self.report_handler.completeReport()
             QMessageBox.information(self, "Report Completed", f"Report {self.report_id} marked as complete.")
             self.close()
             from screens.ManagmentScreen import ManagmentScreen
@@ -262,7 +262,7 @@ class AdminDetailsScreen(QWidget):
 
     # close the screen and go back to management
     def close_screen(self):
-        from screens.ManagmentScreen import ManagmentScreen  # Προσοχή στο import για να αποφύγεις κυκλικές εξαρτήσεις
+        from screens.ManagmentScreen import ManagmentScreen 
         self.management_screen = ManagmentScreen(self.admin_user)
         self.management_screen.show()
         self.close()

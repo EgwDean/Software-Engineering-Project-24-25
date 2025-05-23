@@ -135,7 +135,7 @@ class ManagmentScreen(QWidget):
         """)
         self.more_details_button.setCursor(Qt.PointingHandCursor)
         self.more_details_button.setVisible(False)
-        self.more_details_button.clicked.connect(self.handle_more_details)
+        self.more_details_button.clicked.connect(self.selectReport)
 
         self.side_panel.addWidget(self.more_details_button)
         content_layout.addLayout(self.side_panel)
@@ -143,10 +143,10 @@ class ManagmentScreen(QWidget):
         main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
 
-        self.load_reports()
+        self.fetchReports()
 
     # Load reports from the database
-    def load_reports(self):
+    def fetchReports(self):
         self.table_widget.setRowCount(0)
         conn = DB.Database.connect()
         if not conn or not conn.is_connected():
@@ -190,7 +190,7 @@ class ManagmentScreen(QWidget):
             self.more_details_button.setVisible(True)
 
     # go to the details screen
-    def handle_more_details(self):
+    def selectReport(self):
         self.report_handler = ReportHandler(self.selected_report_id)
         self.details_screen = AdminDetailsScreen(self.admin_user, self.selected_report_id)
         self.details_screen.show()

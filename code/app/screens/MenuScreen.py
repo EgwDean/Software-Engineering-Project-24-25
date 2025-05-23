@@ -142,7 +142,7 @@ class MenuScreen(QWidget):
         nav_menu_frame.setStyleSheet("background-color: skyblue;")
         content_layout.addWidget(nav_menu_frame)
 
-        # === Map Widget ===
+        # Map Widget
         latitude, longitude = self.get_user_coordinates()
         self.map_widget = MapWidget(latitude=latitude, longitude=longitude)
         content_layout.addWidget(self.map_widget)
@@ -199,11 +199,11 @@ class MenuScreen(QWidget):
                 if coords:
                     pin = Pin(latitude=coords[0], longitude=coords[1], title=f"Listing ID: {listing.id}")
                     # Fix: lambda expects no arguments
-                    pin.clicked.connect(lambda l_id=listing.id: self.open_details_screen(l_id))
+                    pin.clicked.connect(lambda l_id=listing.id: self.reportHandling(l_id))
                     self.map_widget.place(pin)
 
     # open details screen if clicked 
-    def open_details_screen(self, listing_id):
+    def reportHandling(self, listing_id):
         """Open the DetailsScreen window for the selected listing."""
         self.details_window = DetailsScreen(listing_id, user=self.admin_user)
         self.details_window.show()
