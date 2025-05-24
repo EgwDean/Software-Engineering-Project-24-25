@@ -15,6 +15,40 @@ VALUES
 ('2', '2', '2222222222', '2@2.com', 5500.0, 223344557, NULL),
 ('3', '3', '3333333333', '3@3.com', 5500.0, 223344558, NULL);
 
+-- Εισαγωγή Εγγραφών στον Πίνακα address
+INSERT INTO address (username_address, country, city, street, number)
+VALUES
+('user1', 'USA', 'New York', '5th Avenue', '10'),
+('user2', 'UK', 'London', 'Baker Street', 10),
+('user3', 'Germany', 'Berlin', 'Alexanderplatz', 10),
+('user4', 'France', 'Paris', 'Champs-Élysées', 10),
+('user5', 'Italy', 'Rome', 'Via del Corso', 10),
+('user6', 'Spain', 'Madrid', 'Gran Vía', 10),
+('user7', 'Canada', 'Toronto', 'Yonge Street', 10),
+('user8', 'Australia', 'Sydney', 'George Street', 10),
+('user9', 'Japan', 'Tokyo', 'Shibuya', 10),
+('user10', 'China', 'Beijing', 'Wangfujing', 10),
+('1', 'Greece', 'Patras', 'Korinthou', 56),
+('2', 'Greece', 'Patras', 'Zaimi', 36),
+('3', 'Greece', 'Patras', 'Aratou', 26);
+
+-- Εισαγωγή Εγγραφών στον Πίνακα vehicle_listing
+INSERT INTO vehicle_listing (name_of_user, price_per_day, vehicle_type, brand, model, year, total_km, fuel_type, description, from_date, to_date, status)
+VALUES
+('user1', 50.0, 'Car', 'Toyota', 'Corolla', '2020', '15000', 'Gasoline', 'Compact car in great condition', '2025-01-01', '2025-12-31', 'listed'),
+('user2', 70.0, 'Truck', 'Ford', 'F-150', '2019', '50000', 'Diesel', 'Large truck with towing capacity', '2025-01-01', '2025-12-31', 'active'),
+('user3', 90.0, 'Motorcycle', 'Harley-Davidson', 'Sportster', '2022', '2000', 'Gasoline', 'Cruiser bike with great performance', '2025-01-01', '2025-12-31', 'listed'),
+('user4', 60.0, 'Car', 'BMW', 'X5', '2021', '10000', 'Diesel', 'Luxury SUV for comfortable drives', '2025-01-01', '2025-12-31', 'pending'),
+('user5', 80.0, 'Truck', 'Chevrolet', 'Silverado', '2018', '70000', 'Diesel', 'Heavy-duty truck for large loads', '2025-01-01', '2025-12-31', 'active'),
+('user6', 120.0, 'Car', 'Mercedes', 'E-Class', '2023', '5000', 'Electric', 'Luxury electric sedan', '2025-01-01', '2025-12-31', 'listed'),
+('user7', 110.0, 'Motorcycle', 'Ducati', 'Panigale', '2021', '3000', 'Gasoline', 'High-performance motorcycle', '2025-01-01', '2025-12-31', 'active'),
+('user8', 150.0, 'Truck', 'Mack', 'Anthem', '2022', '15000', 'Diesel', 'Long-haul truck with powerful engine', '2025-01-01', '2025-12-31', 'listed'),
+('user9', 100.0, 'Car', 'Audi', 'A4', '2020', '20000', 'Gasoline', 'Compact luxury car for daily use', '2025-01-01', '2025-12-31', 'pending'),
+('user10', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'completed'),
+('2', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'listed'),
+('3', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'listed');
+
+
 -- Εισαγωγή Εγγραφών στον Πίνακα admin
 INSERT INTO admin (username, password)
 VALUES
@@ -48,23 +82,6 @@ INSERT INTO commissions (balance)
 VALUES
 (5000);
 
--- Εισαγωγή Εγγραφών στον Πίνακα address
-INSERT INTO address (username_address, country, city, street, number)
-VALUES
-('user1', 'USA', 'New York', '5th Avenue', '10'),
-('user2', 'UK', 'London', 'Baker Street', 10),
-('user3', 'Germany', 'Berlin', 'Alexanderplatz', 10),
-('user4', 'France', 'Paris', 'Champs-Élysées', 10),
-('user5', 'Italy', 'Rome', 'Via del Corso', 10),
-('user6', 'Spain', 'Madrid', 'Gran Vía', 10),
-('user7', 'Canada', 'Toronto', 'Yonge Street', 10),
-('user8', 'Australia', 'Sydney', 'George Street', 10),
-('user9', 'Japan', 'Tokyo', 'Shibuya', 10),
-('user10', 'China', 'Beijing', 'Wangfujing', 10),
-('1', 'Greece', 'Patras', 'Korinthou', 56),
-('2', 'Greece', 'Patras', 'Zaimi', 36),
-('3', 'Greece', 'Patras', 'Aratou', 26);
-
 -- Εισαγωγή Εγγραφών στον Πίνακα pays_subscription
 INSERT INTO pays_subscription (user_name, sub_plan, start_date, end_date)
 VALUES
@@ -78,22 +95,6 @@ VALUES
 ('user8', 'luxury', '2025-01-01', '2025-12-31'),
 ('user9', 'economy', '2025-01-01', '2025-12-31'),
 ('user10', 'exclusive', '2025-01-01', '2025-12-31');
-
--- Εισαγωγή Εγγραφών στον Πίνακα vehicle_listing
-INSERT INTO vehicle_listing (name_of_user, price_per_day, vehicle_type, brand, model, year, total_km, fuel_type, description, from_date, to_date, status)
-VALUES
-('user1', 50.0, 'Car', 'Toyota', 'Corolla', '2020', '15000', 'Gasoline', 'Compact car in great condition', '2025-01-01', '2025-12-31', 'listed'),
-('user2', 70.0, 'Truck', 'Ford', 'F-150', '2019', '50000', 'Diesel', 'Large truck with towing capacity', '2025-01-01', '2025-12-31', 'active'),
-('user3', 90.0, 'Motorcycle', 'Harley-Davidson', 'Sportster', '2022', '2000', 'Gasoline', 'Cruiser bike with great performance', '2025-01-01', '2025-12-31', 'listed'),
-('user4', 60.0, 'Car', 'BMW', 'X5', '2021', '10000', 'Diesel', 'Luxury SUV for comfortable drives', '2025-01-01', '2025-12-31', 'pending'),
-('user5', 80.0, 'Truck', 'Chevrolet', 'Silverado', '2018', '70000', 'Diesel', 'Heavy-duty truck for large loads', '2025-01-01', '2025-12-31', 'active'),
-('user6', 120.0, 'Car', 'Mercedes', 'E-Class', '2023', '5000', 'Electric', 'Luxury electric sedan', '2025-01-01', '2025-12-31', 'listed'),
-('user7', 110.0, 'Motorcycle', 'Ducati', 'Panigale', '2021', '3000', 'Gasoline', 'High-performance motorcycle', '2025-01-01', '2025-12-31', 'active'),
-('user8', 150.0, 'Truck', 'Mack', 'Anthem', '2022', '15000', 'Diesel', 'Long-haul truck with powerful engine', '2025-01-01', '2025-12-31', 'listed'),
-('user9', 100.0, 'Car', 'Audi', 'A4', '2020', '20000', 'Gasoline', 'Compact luxury car for daily use', '2025-01-01', '2025-12-31', 'pending'),
-('user10', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'completed'),
-('2', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'listed'),
-('3', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'listed');
 
 -- Εισαγωγή Εγγραφών στον Πίνακα rents
 INSERT INTO rents (user_who_rents, from_date, number_of_days, id_of_listing)

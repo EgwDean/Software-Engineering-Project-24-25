@@ -1,15 +1,10 @@
-import sys
-import requests
-from pathlib import Path
-
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
-    QFrame, QToolButton, QSizePolicy
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame, QToolButton
 )
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QIcon
-
-import services.Database as DB
+from pathlib import Path
+import requests
 from services.Map import Map
 from services.Pin import Pin
 from entities.VehicleListing import VehicleListing
@@ -25,15 +20,15 @@ class MapScreen(QWidget):
     def __init__(self, user):
         super().__init__()
         self.user = user
-        self.listings = []
+        self.listings = []  # Store all VehicleListing instances
         self.setWindowTitle("Map Screen")
         self.setStyleSheet("background-color: #f0f0f0;")
-        self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.showMaximized()
 
-        self.main_layout = QVBoxLayout()
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
+        # === Top menu ===
         self._init_top_menu()
         self._init_content_layout()
 
@@ -45,41 +40,75 @@ class MapScreen(QWidget):
         top_menu_layout = QHBoxLayout()
         top_menu_layout.setAlignment(Qt.AlignLeft)
 
+        # Logo
         logo_path = Path(__file__).parent.parent.parent / 'assets' / 'logo_1.png'
+        if not logo_path.exists():
+            raise FileNotFoundError(f"Logo file not found at {logo_path}")
         logo_label = QLabel()
-        logo_label.setPixmap(QPixmap(str(logo_path)).scaledToWidth(70, Qt.SmoothTransformation))
+        pixmap = QPixmap(str(logo_path))
+        logo_label.setPixmap(pixmap.scaledToWidth(70, Qt.SmoothTransformation))
         top_menu_layout.addWidget(logo_label)
 
+        # Search bar
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText("Search...")
-        self.search_bar.setStyleSheet("padding: 8px; font-size: 14px; background-color: white; border-radius: 5px;")
+        self.search_bar.setStyleSheet("""
+            padding: 8px;
+            font-size: 14px;
+            border: none;
+            background-color: white;
+            border-radius: 5px;
+        """)
         self.search_bar.returnPressed.connect(self.perform_search)
         top_menu_layout.addWidget(self.search_bar)
 
-        search_icon = Path(__file__).parent.parent.parent / 'assets' / 'icons8-search-30.png'
+        # Search button with icon
+        search_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-search-30.png'
+        if not search_icon_path.exists():
+            raise FileNotFoundError(f"Search icon file not found at {search_icon_path}")
         search_button = QToolButton()
-        search_button.setIcon(QIcon(str(search_icon)))
-        search_button.setStyleSheet("border: none; background-color: transparent;")
+        search_button.setIcon(QIcon(str(search_icon_path)))  # Wrap QPixmap in QIcon
+        search_button.setStyleSheet("""
+            border: none;
+            background-color: transparent;
+        """)
         search_button.clicked.connect(self.perform_search)
         top_menu_layout.addWidget(search_button)
 
-        filter_icon = Path(__file__).parent.parent.parent / 'assets' / 'icons8-filter-30.png'
+        # Filter icon
+        filter_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-filter-30.png'
+        if not filter_icon_path.exists():
+            raise FileNotFoundError(f"Filter icon file not found at {filter_icon_path}")
         filter_button = QToolButton()
-        filter_button.setIcon(QIcon(str(filter_icon)))
-        filter_button.setStyleSheet("border: none; background-color: transparent;")
-        filter_button.clicked.connect(self.open_filter_popup)
+        filter_button.setIcon(QIcon(str(filter_icon_path)))  # Wrap QPixmap in QIcon
+        filter_button.setStyleSheet("""
+            border: none;
+            background-color: transparent;
+        """)
+        filter_button.clicked.connect(self.open_filter_popup)  # Connect to the filter popup
         top_menu_layout.addWidget(filter_button)
 
+        # Clear Filters button
         clear_filters_button = QPushButton("Clear Filters")
-        clear_filters_button.setStyleSheet("padding: 8px; font-size: 14px; background-color: skyblue; border: 1px solid black; border-radius: 5px;")
-        clear_filters_button.clicked.connect(self.clear_filters)
+        clear_filters_button.setStyleSheet("""
+            padding: 8px;
+            font-size: 14px;
+            background-color: skyblue;
+            border: 1px solid black;
+            border-radius: 5px;
+        """)
+        clear_filters_button.clicked.connect(self.clear_filters)  # Connect to the clear_filters method
         top_menu_layout.addWidget(clear_filters_button)
 
-        user_icon = Path(__file__).parent.parent.parent / 'assets' / 'icons8-user-30.png'
+        # User icon
+        user_icon_path = Path(__file__).parent.parent.parent / 'assets' / 'icons8-user-30.png'
+        if not user_icon_path.exists():
+            raise FileNotFoundError(f"User icon file not found at {user_icon_path}")
         user_label = QLabel()
-        user_label.setPixmap(QPixmap(str(user_icon)).scaledToWidth(30, Qt.SmoothTransformation))
+        user_pixmap = QPixmap(str(user_icon_path))
+        user_label.setPixmap(user_pixmap.scaledToWidth(30, Qt.SmoothTransformation))
         user_label.setCursor(Qt.PointingHandCursor)
-        user_label.mousePressEvent = self.open_profile_screen
+        user_label.mousePressEvent = self.open_profile_screen  # Link to ProfileScreen
         top_menu_layout.addWidget(user_label)
 
         top_menu_frame = QFrame()
@@ -87,10 +116,11 @@ class MapScreen(QWidget):
         top_menu_frame.setStyleSheet("background-color: skyblue; padding: 10px;")
         self.main_layout.addWidget(top_menu_frame)
 
-    def _init_content_layout(self):
-        self.content_layout = QHBoxLayout()
-        self.content_layout.setContentsMargins(0, 0, 0, 0)
+        # === Content layout ===
+        content_layout = QHBoxLayout()
+        content_layout.setContentsMargins(0, 0, 0, 0)
 
+        # Navigation menu
         nav_menu = QVBoxLayout()
         nav_menu.setAlignment(Qt.AlignTop)
 
@@ -151,23 +181,23 @@ class MapScreen(QWidget):
             nav_menu.addWidget(button)
 
         nav_menu.addStretch()
-        nav_frame = QFrame()
-        nav_frame.setLayout(nav_menu)
-        nav_frame.setFixedWidth(200)
-        nav_frame.setStyleSheet("background-color: skyblue;")
-        self.content_layout.addWidget(nav_frame)
 
+        nav_menu_frame = QFrame()
+        nav_menu_frame.setLayout(nav_menu)
+        nav_menu_frame.setFixedWidth(200)
+        nav_menu_frame.setStyleSheet("background-color: skyblue;")
+        content_layout.addWidget(nav_menu_frame)
+
+        # Map widget
         user_coords = self.get_user_coordinates()
         self.map_widget = Map(latitude=user_coords[0], longitude=user_coords[1])
-        self.map_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.content_layout.addWidget(self.map_widget, stretch=1)
+        content_layout.addWidget(self.map_widget)
 
-        self.main_layout.addLayout(self.content_layout)
-
+        # Fetch listings and place pins
         self.fetch_listings()
         self.place_pins()
 
-        self.main_layout.addLayout(self.content_layout)
+        self.main_layout.addLayout(content_layout)
         self.setLayout(self.main_layout)
 
     def get_user_coordinates(self):
@@ -205,33 +235,51 @@ class MapScreen(QWidget):
         return 51.505, -0.09  # Default to London
 
     def fetch_listings(self):
+        """Fetch all listings from the database and create VehicleListing instances."""
         try:
             db = DB.Database()
-            conn = db.connect()
-            if conn:
-                cur = conn.cursor()
-                cur.execute("SELECT id FROM vehicle_listing WHERE status='listed'")
-                for (listing_id,) in cur.fetchall():
-                    listing = VehicleListing(listing_id)
-                    self.listings.append(listing)
-                cur.close()
-                conn.close()
+            connection = db.connect()
+
+            if connection is None:
+                print("Failed to connect to the database.")
+                return
+
+            cursor = connection.cursor()
+            query = "SELECT id FROM vehicle_listing WHERE status = 'listed'"
+            cursor.execute(query)
+            results = cursor.fetchall()
+
+            for row in results:
+                listing_id = row[0]
+                listing = VehicleListing(listing_id)
+                self.listings.append(listing)
+
+            cursor.close()
+            connection.close()
+
+            print(f"Fetched {len(self.listings)} listings from the database.")
+
         except Exception as e:
-            print(f"Error fetching listings: {e}")
+            print(f"An error occurred while fetching listings: {e}")
 
     def place_pins(self):
+        """Convert addresses to coordinates and place pins on the map."""
         for listing in self.listings:
+            # Skip listings that belong to the logged-in user
             if listing.name_of_user == self.user.username:
                 continue
+
             if listing.country and listing.city and listing.street and listing.number:
                 address = f"{listing.street} {listing.number}, {listing.city}, {listing.country}"
                 coords = self.get_coordinates_from_address_string(address)
                 if coords:
                     pin = Pin(latitude=coords[0], longitude=coords[1], title=f"Listing ID: {listing.id}")
-                    pin.clicked.connect(lambda _, lid=listing.id: self.open_details_screen(lid))
+                    # Fix: lambda expects no arguments
                     self.map_widget.place(pin)
+                    pin.clicked.connect(lambda l_id=listing.id: self.open_details_screen(l_id))
 
     def open_details_screen(self, listing_id):
+        """Open the DetailsScreen window for the selected listing."""
         self.details_window = DetailsScreen(listing_id, user=self.user)
         self.details_window.show()
 
@@ -242,49 +290,16 @@ class MapScreen(QWidget):
         self.hide()
         self.history_page.show()
 
-    def _on_history_back(self):
-        self.history_page.close()
-        self.show()
-        self.raise_()
-        self.showMaximized()
-
-        # ✅ Force layout update and repaint
-        self.layout().activate()
-        self.map_widget.updateGeometry()
-        QTimer.singleShot(0, lambda: self.map_widget.resize(self.content_layout.geometry().size()))
-        self.map_widget.repaint()
-
-    def open_listings(self):
+    def open_listings(self, event=None):
+        # Create and show the ListingsScreen window
         self.listings_window = ListingsScreen(self.user)
         self.listings_window.show()
 
     def open_profile_screen(self, event=None):
-        from screens.ProfileScreen import ProfileScreen
-        self.profile_screen = ProfileScreen(self.user, self)
-        self.profile_screen.show()
-
-    def get_user_coordinates(self):
-        try:
-            db = DB.Database()
-            conn = db.connect()
-            if conn:
-                cur = conn.cursor()
-                cur.execute(
-                    "SELECT country, city, street, number FROM address WHERE username_address=%s",
-                    (self.user.username,)
-                )
-                r = cur.fetchone()
-                cur.close()
-                conn.close()
-                if r:
-                    country, city, street, number = r
-                    address = f"{street} {number}, {city}, {country}"
-                    coords = self.get_coordinates_from_address_string(address)
-                    if coords:
-                        return coords
-        except Exception as e:
-            print(f"Error in get_user_coordinates: {e}")
-        return 51.505, -0.09
+        # Αναβολή της εισαγωγής της ProfileScreen εδώ
+        from screens.ProfileScreen import ProfileScreen  # Εισάγουμε την ProfileScreen μόνο όταν χρειάζεται
+        self.profile_screen = ProfileScreen(self.user, self)  # Δημιουργούμε την ProfileScreen
+        self.profile_screen.show()  # Εμφανίζουμε την ProfileScreen
 
     def open_create_screen(self):
         from screens.CreateScreen import CreateScreen
@@ -292,31 +307,44 @@ class MapScreen(QWidget):
         self.create_screen.show()
 
     def get_coordinates_from_address_string(self, address):
+        """Convert an address string to latitude and longitude using a geocoding API."""
         try:
             url = "https://nominatim.openstreetmap.org/search"
             params = {"q": address, "format": "json"}
             headers = {"User-Agent": "PyQtMapApp"}
-            resp = requests.get(url, params=params, headers=headers)
-            data = resp.json()
+            response = requests.get(url, params=params, headers=headers)
+            data = response.json()
             if data:
-                return float(data[0]["lat"]), float(data[0]["lon"])
+                lat = float(data[0]["lat"])
+                lon = float(data[0]["lon"])
+                return lat, lon
         except Exception as e:
             print(f"Geocoding error: {e}")
         return None
 
     def perform_search(self):
-        loc = self.search_bar.text().strip()
-        if loc:
-            coords = self.get_coordinates_from_address_string(loc)
+        """Perform a search using the search bar and center the map."""
+        location = self.search_bar.text().strip()
+        if location:
+            coords = self.get_coordinates_from_address_string(location)
             if coords:
                 self.map_widget.center_map(coords[0], coords[1])
+            else:
+                print(f"Could not find coordinates for location: {location}")
+        else:
+            print("Search bar is empty. Please enter a location.")
 
     def open_filter_popup(self):
-        dlg = Filter(self.map_widget, self)
-        dlg.exec_()
+        """Open the filter popup."""
+        print("Opening filter popup.")  # Debug
+        filter_dialog = Filter(self.map_widget, self)
+        filter_dialog.exec_()
 
     def clear_filters(self):
-        self.listings.clear()
-        self.fetch_listings()
-        self.map_widget.clear_pins()
-        self.place_pins()
+        """Clear all filters and reload the pins."""
+        print("Clearing filters...")
+        self.listings = []  # Reset listings
+        self.fetch_listings()  # Re-fetch all listings
+        self.map_widget.clear_pins()  # Clear existing pins on the map
+        self.place_pins()  # Place all pins again
+        print("Filters cleared and pins reloaded.")
