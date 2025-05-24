@@ -12,16 +12,9 @@ from PyQt5.QtGui import QPixmap, QIcon
 import services.Database as DB
 from services.Map import Map
 from services.Pin import Pin
-<<<<<<< HEAD
-from services.Search import Search
-from services.Filter import Filter
-
-from entities.VehicleListing import VehicleListing
-=======
 from entities.VehicleListing import VehicleListing
 import services.Database as DB
 from services.Filter import Filter 
->>>>>>> 9238ea5b4481ba871752a2ab4c7ffd260dc99b74
 from screens.DetailsScreen import DetailsScreen
 from screens.HistoryPage import HistoryPage
 from screens.ListingsScreen import ListingsScreen
@@ -46,7 +39,7 @@ class MapScreen(QWidget):
 
         self.setLayout(self.main_layout)
 
-        self.search = Search(self.map_widget)
+        # self.search = Search(self.map_widget)
 
     def _init_top_menu(self):
         top_menu_layout = QHBoxLayout()
@@ -101,24 +94,6 @@ class MapScreen(QWidget):
         nav_menu = QVBoxLayout()
         nav_menu.setAlignment(Qt.AlignTop)
 
-<<<<<<< HEAD
-        button = QPushButton("View All Listings")
-        button.clicked.connect(self.open_listings)
-        nav_menu.addWidget(button)
-
-        button2 = QPushButton("History")
-        button2.clicked.connect(self.open_history)
-        nav_menu.addWidget(button2)
-
-        for i in range(3):
-            todo_btn = QPushButton(f"TODO {i + 3}")
-            nav_menu.addWidget(todo_btn)
-
-        for i in range(nav_menu.count()):
-            widget = nav_menu.itemAt(i).widget()
-            if widget is not None:
-                widget.setStyleSheet("padding: 10px; font-size: 14px; background-color: skyblue; border: 1px solid black; text-align: left;")
-=======
         # View All Listings button
         view_all_btn = QPushButton("View All Listings")
         view_all_btn.setStyleSheet("""
@@ -174,7 +149,6 @@ class MapScreen(QWidget):
                 border: 1px solid black;
             """)
             nav_menu.addWidget(button)
->>>>>>> 9238ea5b4481ba871752a2ab4c7ffd260dc99b74
 
         nav_menu.addStretch()
         nav_frame = QFrame()
@@ -193,14 +167,8 @@ class MapScreen(QWidget):
         self.fetch_listings()
         self.place_pins()
 
-<<<<<<< HEAD
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        if hasattr(self, 'map_widget'):
-            QTimer.singleShot(0, self.map_widget.repaint)
-=======
-        main_layout.addLayout(content_layout)
-        self.setLayout(main_layout)
+        self.main_layout.addLayout(self.content_layout)
+        self.setLayout(self.main_layout)
 
     def get_user_coordinates(self):
         """Fetch the user's address and convert it to coordinates."""
@@ -235,7 +203,6 @@ class MapScreen(QWidget):
             print(f"An error occurred while fetching user coordinates: {e}")
 
         return 51.505, -0.09  # Default to London
->>>>>>> 9238ea5b4481ba871752a2ab4c7ffd260dc99b74
 
     def fetch_listings(self):
         try:
@@ -269,18 +236,11 @@ class MapScreen(QWidget):
         self.details_window.show()
 
     def open_history(self):
-<<<<<<< HEAD
-        self.history_page = HistoryPage(self.user)
-        self.history_page.back_requested.connect(self._on_history_back)
-        self.history_page.showMaximized()
-        self.hide()
-=======
         """Instantiate and show the HistoryPage."""
         self.history_page = HistoryPage(self.user)
         self.history_page.back_requested.connect(self.show)
         self.hide()
         self.history_page.show()
->>>>>>> 9238ea5b4481ba871752a2ab4c7ffd260dc99b74
 
     def _on_history_back(self):
         self.history_page.close()
