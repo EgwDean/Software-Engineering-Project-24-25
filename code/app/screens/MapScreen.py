@@ -160,7 +160,7 @@ class MapScreen(QWidget):
         
         
          # Subscription button
-        subscription_btn = QPushButton("Subscription")
+        subscription_btn = QPushButton("Subscriptions")
         subscription_btn.setStyleSheet("""
             padding: 10px;
             font-size: 14px;
@@ -173,19 +173,21 @@ class MapScreen(QWidget):
         subscription_btn.clicked.connect(self.open_subscription_screen)
         nav_menu.addWidget(subscription_btn)
 
-        # Add any remaining TODO buttons if needed
-        for i in range(1):
-            button = QPushButton(f"TODO {i + 4}")
-            button.setStyleSheet("""
-                padding: 10px;
-                font-size: 14px;
-                background-color: skyblue;
-                border: none;
-                color: black;
-                text-align: left;
-                border: 1px solid black;
-            """)
-            nav_menu.addWidget(button)
+        # Pending Leases button
+        pendingLeases_btn = QPushButton("Pending Leases")
+        pendingLeases_btn.setStyleSheet("""
+            padding: 10px;
+            font-size: 14px;
+            background-color: skyblue;
+            border: none;
+            color: black;
+            text-align: left;
+            border: 1px solid black;
+        """)
+        pendingLeases_btn.clicked.connect(self.open_pending_leases_screen)
+        nav_menu.addWidget(pendingLeases_btn)
+
+
 
 
         nav_menu.addStretch()
@@ -358,16 +360,23 @@ class MapScreen(QWidget):
         print("Filters cleared and pins reloaded.")
         
         
-        
-     def open_subscription_screen(self):
+    # open subscription screen
+    def open_subscription_screen(self):
         from screens.SubPackagesScreen import SubPackagesScreen
         from screens.MySubscriptionsScreen import MySubscriptionsScreen
         from services.ManageSubsClass import ManageSubsClass
 
         subs_manager = ManageSubsClass()
-        has_active = subs_manager.has_active_subscription(self.user.username)
+        has_active = subs_manager.checkSub(self.user.username)
         if has_active:
             self.subscription_screen = MySubscriptionsScreen(self.user)
         else:
             self.subscription_screen = SubPackagesScreen(self.user)
         self.subscription_screen.show()
+
+
+    # open pending leases screen
+    def open_pending_leases_screen(self):
+        from screens.PendingLeasesScreen import PendingLeasesScreen 
+        self.pending_leases_screen = PendingLeasesScreen(self.user)
+        self.pending_leases_screen.show()

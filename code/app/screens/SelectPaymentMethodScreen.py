@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QButtonGroup
 
-class PaymentMethodScreen(QDialog):
+class SelectPaymentMethodScreen(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Select Payment Method")
@@ -8,8 +8,8 @@ class PaymentMethodScreen(QDialog):
         layout.addWidget(QLabel("Choose a payment method:"))
 
         self.button_group = QButtonGroup(self)
-        methods = ["Credit Card", "PayPal", "Bank Transfer"]
-        for method in methods:
+        self.methods = ["Credit Card", "PayPal", "Bank Transfer"]
+        for method in self.methods:
             btn = QPushButton(method)
             btn.setCheckable(True)
             self.button_group.addButton(btn)
@@ -19,6 +19,6 @@ class PaymentMethodScreen(QDialog):
         confirm_btn.clicked.connect(self.accept)
         layout.addWidget(confirm_btn)
 
-    def get_selected_method(self):
+    def chooseMethod(self):
         checked = self.button_group.checkedButton()
         return checked.text() if checked else None

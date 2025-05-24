@@ -3,7 +3,7 @@ from datetime import date
 
 class ManageSubsClass:
     @staticmethod
-    def has_active_subscription(username):
+    def checkSub(username):
         db = DB.Database()
         conn = db.connect()
         cursor = conn.cursor(dictionary=True)
@@ -17,7 +17,7 @@ class ManageSubsClass:
         return result is not None
 
     @staticmethod
-    def get_active_subscription_details(username):
+    def getActiveSubscriptionDetails(username):
         db = DB.Database()
         conn = db.connect()
         cursor = conn.cursor(dictionary=True)

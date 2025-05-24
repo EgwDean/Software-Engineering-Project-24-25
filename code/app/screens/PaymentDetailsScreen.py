@@ -34,10 +34,14 @@ class PaymentDetailsScreen(QDialog):
             layout.addWidget(self.cvv)
 
         self.confirm_btn = QPushButton("Confirm Payment")
-        self.confirm_btn.clicked.connect(self.confirm_payment)
+        self.confirm_btn.clicked.connect(self.enterDetails)
         layout.addWidget(self.confirm_btn)
 
-    def confirm_payment(self):
+    def checkDetails(self):
+        """
+        Checks the validity of the payment details.
+        Returns (invalid: bool, reason: str)
+        """
         reason = ""
         invalid = False
         if self.payment_method == "Credit Card":
@@ -58,56 +62,31 @@ class PaymentDetailsScreen(QDialog):
             if not self.card_number.text().strip():
                 invalid = True
                 reason = "Please enter your account/email."
+        return invalid, reason
 
+    def displayNotEnough(self, reason):
+        dlg = InvalidPaymentDetailsScreen(self, reason=reason)
+        dlg.exec_()
+
+    def displayConfirm(self):
+        confirm_screen = ConfirmSubscriptionScreen(self.user, self.selected_package)
+        confirm_screen.exec_()
+        if self.parent():
+            self.parent().close()  # Close SubPackagesScreen if this dialog was opened from it
+        from screens.MySubscriptionsScreen import MySubscriptionsScreen
+        self.close()  # Close PaymentDetailsScreen itself
+        self.sub_screen = MySubscriptionsScreen(self.user)
+        self.sub_screen.show()
+
+    def enterDetails(self):
+        invalid, reason = self.checkDetails()
         if invalid:
-            dlg = InvalidPaymentDetailsScreen(self, reason=reason)
-            dlg.exec_()
+            self.displayNotEnough(reason)
             return
 
-        # Check balance using ManageBalanceClass
-        balance_manager = ManageBalanceClass()
-        user_balance = balance_manager.get_balance(self.user.username)
-        plan_price = self.selected_package['price']
-        if user_balance >= plan_price:
-            # Deduct balance and create subscription
-            db = DB.Database()
-            conn = db.connect()
-            cursor = conn.cursor()
-            try:
-                # Deduct balance
-                cursor.execute("UPDATE user SET balance = balance - %s WHERE username = %s", (plan_price, self.user.username))
-                # Create subscription (example: 1 month from today)
-                today = date.today()
-                # Calculate end date (1 month later, handling year change)
-                month = today.month + 1
-                year = today.year
-                if month > 12:
-                    month = 1
-                    year += 1
-                # Handle day overflow for months with fewer days
-                try:
-                    end = date(year, month, today.day)
-                except ValueError:
-                    # If day does not exist in next month, use last day of next month
-                    from calendar import monthrange
-                    end = date(year, month, monthrange(year, month)[1])
-                cursor.execute(
-                    "INSERT INTO pays_subscription (user_name, sub_plan, start_date, end_date) VALUES (%s, %s, %s, %s)",
-                    (self.user.username, self.selected_package['plan'], today, end)
-                )
-                conn.commit()
-            finally:
-                cursor.close()
-                conn.close()
-            # Show confirmation
-            confirm_screen = ConfirmSubscriptionScreen(self.user, self.selected_package)
-            confirm_screen.exec_()
-            if self.parent():
-                self.parent().close()  # Close SubPackagesScreen if this dialog was opened from it
-            from screens.MySubscriptionsScreen import MySubscriptionsScreen
-            self.close()  # Close PaymentDetailsScreen itself
-            self.sub_screen = MySubscriptionsScreen(self.user)
-            self.sub_screen.show()
+        ok, msg = ManageBalanceClass.checkBalance(self.user, self.selected_package)
+        if ok:
+            self.displayConfirm()
         else:
             dlg = InadequateBalanceScreen(self)
             dlg.exec_()

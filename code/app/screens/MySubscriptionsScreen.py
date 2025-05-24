@@ -37,13 +37,13 @@ class MySubscriptionsScreen(QWidget):
             }
         """)
         back_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        back_button.clicked.connect(self.go_back_to_map)
+        back_button.clicked.connect(self.goBackToMap)
         top_row.addWidget(back_button)
         top_row.addStretch()
         outer_layout.addLayout(top_row)
 
         # Fetch active subscription details using ManageSubsClass
-        sub = ManageSubsClass.get_active_subscription_details(self.user.username)
+        sub = ManageSubsClass.getActiveSubscriptionDetails(self.user.username)
         print("DEBUG: subscription details:", sub)
 
         if sub:
@@ -96,7 +96,7 @@ class MySubscriptionsScreen(QWidget):
                 }
             """)
             cancel_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            cancel_btn.clicked.connect(self.handle_cancel_subscription)
+            cancel_btn.clicked.connect(self.cancelSub)
 
             card_layout.addWidget(plan_label)
             card_layout.addWidget(price_label)
@@ -114,16 +114,16 @@ class MySubscriptionsScreen(QWidget):
             no_sub_label.setAlignment(Qt.AlignCenter)
             outer_layout.addWidget(no_sub_label)
 
-    def go_back_to_map(self):
+    def goBackToMap(self):
         self.close()
 
-    def handle_cancel_subscription(self):
+    def cancelSub(self):
         # Show confirmation dialog
         self.cancel_dialog = CancelSubScreen(self)
         result = self.cancel_dialog.exec_()
         if result == QMessageBox.Yes:
             # User confirmed cancellation
-            success = ManageCancelSubClass.cancel_subscription(self.user.username)
+            success = ManageCancelSubClass.cancelSub(self.user.username)
             if success:
                 QMessageBox.information(self, "Canceled", "Your subscription has been canceled.")
                 self.close()

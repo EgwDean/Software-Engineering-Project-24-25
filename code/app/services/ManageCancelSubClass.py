@@ -3,7 +3,7 @@ from datetime import date
 
 class ManageCancelSubClass:
     @staticmethod
-    def cancel_subscription(username):
+    def cancelSub(username):
         """
         Deletes the active subscription (with end_date >= today) for the given user from pays_subscription.
         Returns True if a subscription was deleted, False otherwise.

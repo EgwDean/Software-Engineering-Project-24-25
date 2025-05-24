@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QFrame, QHBoxLayout, Q
 from PyQt5.QtCore import Qt
 import services.Database as DB
 from services.ManageSubsClass import ManageSubsClass
-from screens.PaymentMethodScreen import PaymentMethodScreen
+from screens.SelectPaymentMethodScreen import SelectPaymentMethodScreen
 from screens.PaymentDetailsScreen import PaymentDetailsScreen
 
 class SubPackagesScreen(QWidget):
@@ -34,19 +34,19 @@ class SubPackagesScreen(QWidget):
             }
         """)
         back_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        back_button.clicked.connect(self.go_back_to_map)
+        back_button.clicked.connect(self.goBackToMap)
         self.main_layout.addWidget(back_button)
 
         # Use ManageSubsClass for subscription check
-        if ManageSubsClass.has_active_subscription(self.user.username):
+        if ManageSubsClass.checkSub(self.user.username):
             self.show_my_subscriptions()
         else:
-            self.show_subscription_packages()
+            self.displayPackages()
 
-    def go_back_to_map(self):
+    def goBackToMap(self):
         self.close()
 
-    def show_subscription_packages(self):
+    def displayPackages(self):
         # Remove all widgets except the back button (assumed at index 0)
         while self.main_layout.count() > 1:
             widget = self.main_layout.itemAt(1).widget()
@@ -121,7 +121,7 @@ class SubPackagesScreen(QWidget):
                 }
             """)
             select_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            select_btn.clicked.connect(lambda _, p=plan: self.on_package_selected(p))
+            select_btn.clicked.connect(lambda _, p=plan: self.chooseSub(p))
 
             card_layout.addWidget(plan_label)
             card_layout.addWidget(price_label)
@@ -136,43 +136,14 @@ class SubPackagesScreen(QWidget):
         scroll.setMinimumHeight(350)
         self.main_layout.addWidget(scroll)
 
-    def on_package_selected(self, package):
+    def chooseSub(self, package):
         self.selected_package = package
-        dlg = PaymentMethodScreen(self)
+        dlg = SelectPaymentMethodScreen(self)
         if dlg.exec_() == dlg.Accepted:
-            method = dlg.get_selected_method()
+            method = dlg.chooseMethod()
             if method:
-                self.on_payment_method_selected(method)
+                payment_dlg = PaymentDetailsScreen(self.user, self.selected_package, method, self)
+                if payment_dlg.exec_() == payment_dlg.Accepted:
+                    pass  # Optionally handle post-payment logic here
             else:
                 QMessageBox.warning(self, "No Selection", "Please select a payment method.")
-
-    def on_payment_method_selected(self, method):
-        dlg = PaymentDetailsScreen(self.user, self.selected_package, method, self)
-        if dlg.exec_() == dlg.Accepted:
-            # Optionally handle post-payment logic here
-            pass
-
-    def on_payment_details_entered(self, details):
-        if not self.validate_payment_details(details):
-            self.show_invalid_payment_details()
-            return
-        if not self.user.has_sufficient_balance(details['amount']):
-            self.show_inadequate_balance()
-            return
-        self.confirm_subscription()
-
-    def confirm_subscription(self):
-        # Ενημέρωση συνδρομής στη βάση και εμφάνιση ConfirmSubscriptionScreen
-        pass
-
-    def show_inadequate_balance(self):
-        # Εμφάνιση οθόνης InadequateBalanceScreen
-        pass
-
-    def show_invalid_payment_details(self):
-        # Εμφάνιση οθόνης InvalidPaymentDetailsScreen
-        pass
-
-    def show_my_subscriptions(self):
-        # Εμφάνιση MySubscriptionsScreen με δυνατότητα ακύρωσης
-        pass
