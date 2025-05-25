@@ -73,7 +73,7 @@ class StatisticScreen(QWidget):
         top_menu_frame.setStyleSheet("background-color: skyblue; padding: 10px;")
         main_layout.addWidget(top_menu_frame)
 
-        # --- Main Content with Sidebar ---
+        # Main Content with Sidebar 
         content_layout = QHBoxLayout()
 
         # Sidebar with filters
@@ -118,9 +118,9 @@ class StatisticScreen(QWidget):
             border: none;
             border-radius: 4px;
         """)
-        graph_button.clicked.connect(self.show_graph)
+        graph_button.clicked.connect(self.showGraph)
 
-        # Προσθήκη του κουμπιού Export Statistics
+        # Export Statistics
         export_button = QPushButton("Export Statistics")
         export_button.setStyleSheet(""" 
             padding: 6px;
@@ -130,7 +130,7 @@ class StatisticScreen(QWidget):
             border: none;
             border-radius: 4px;
         """)
-        export_button.clicked.connect(self.export_statistics)
+        export_button.clicked.connect(self.exportData)
 
         sidebar_layout.addWidget(self.brand_input)
         sidebar_layout.addWidget(self.model_input)
@@ -150,25 +150,56 @@ class StatisticScreen(QWidget):
 
         # Table
         self.table_widget = QTableWidget()
-        self.table_widget.setColumnCount(5)  # 5 columns (brand, model, vehicle_type, status, count)
+        self.table_widget.setColumnCount(5)
         self.table_widget.setHorizontalHeaderLabels(["Brand", "Model", "Vehicle Type", "Status", "Total Listings"])
-        self.table_widget.setStyleSheet(""" 
-            QTableWidget {
-                font-size: 14px;
-                gridline-color: #ccc;
-                border: 1px solid #ccc;
-            }
-            QHeaderView::section {
-                background-color: lightgray;
-                font-weight: bold;
-                padding: 6px;
-                border: none;
-            }
-        """)
-        self.table_widget.setShowGrid(True)
+        self.table_widget.setShowGrid(False)
         self.table_widget.setEditTriggers(QTableWidget.NoEditTriggers)
         self.table_widget.setSelectionBehavior(QTableWidget.SelectRows)
         self.table_widget.setAlternatingRowColors(True)
+        self.table_widget.verticalHeader().setVisible(False)
+
+        # Styling
+        self.table_widget.setStyleSheet("""
+            QTableWidget {
+                font-size: 13px;
+                border: none;
+                background-color: #ffffff;
+                alternate-background-color: #f9f9f9;
+            }
+            QHeaderView::section {
+                background-color: #34495e;
+                color: white;
+                font-weight: bold;
+                font-size: 13px;
+                padding: 8px;
+                border-bottom: 1px solid #dcdcdc;
+            }
+            QTableWidget::item {
+                padding: 8px;
+            }
+            QTableWidget::item:selected {
+                background-color: #3498db;
+                color: white;
+            }
+            QTableWidget::item:hover {
+                background-color: #ecf0f1;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #ecf0f1;
+                width: 8px;
+                margin: 0px 0px 0px 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #bdc3c7;
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+        """)
+
 
         content_layout.addWidget(self.table_widget)
         main_layout.addLayout(content_layout)
@@ -180,8 +211,8 @@ class StatisticScreen(QWidget):
     def filter(self, brand_filter="", model_filter="", date_filter="", vehicle_type_filter="", status_filter=""):
         self.table_widget.setRowCount(0)
         try:
-            results = FilterStatistics.fetch_statistics(brand_filter, model_filter, date_filter, vehicle_type_filter, status_filter)
-            self.display_statistics(results)
+            results = FilterStatistics.fetchStatistics(brand_filter, model_filter, date_filter, vehicle_type_filter, status_filter)
+            self.displayStatistics(results)
         except Exception as e:
             error_label = QLabel(f"Error: {e}")
             self.layout().addWidget(error_label)
@@ -194,7 +225,7 @@ class StatisticScreen(QWidget):
         status = self.status_input.text().strip()
         self.filter(brand_filter=brand, model_filter=model, date_filter=date, vehicle_type_filter=vehicle_type, status_filter=status)
 
-    def display_statistics(self, results):
+    def displayStatistics(self, results):
         # Populate the table with the results
         self.table_widget.setRowCount(len(results))
         for row_index, row_data in enumerate(results):
@@ -239,9 +270,9 @@ class StatisticScreen(QWidget):
     def do_nothing(self, event):
         pass
 
-    def show_graph(self):
+    def showGraph(self):
         try:
-            results = FilterStatistics.fetch_statistics(
+            results = FilterStatistics.fetchStatistics(
                 self.brand_input.text().strip(),
                 self.model_input.text().strip(),
                 self.date_input.text().strip(),
@@ -249,11 +280,11 @@ class StatisticScreen(QWidget):
                 self.status_input.text().strip()
             )
 
-            # Δημιουργία γραφημάτων με Plotly
+            # create the Graph object and generate graphs
             graph = Graph(results)
-            graph_html_paths = graph.create_graphs()  # HTML files για τα γραφήματα
+            graph_html_paths = graph.create_graphs()  # HTML files 
 
-            # Εμφάνιση των γραφημάτων στην οθόνη
+            # show the graphs in a new window
             self.graph_screen = GraphScreen(graph_html_paths)
             self.graph_screen.show()
 
@@ -262,10 +293,10 @@ class StatisticScreen(QWidget):
             self.layout().addWidget(error_label)
 
 
-    def export_statistics(self):
+    def exportData(self):
         try:
-            # Παίρνουμε τα αποτελέσματα
-            results = FilterStatistics.fetch_statistics(
+            # get the filtered statistics
+            results = FilterStatistics.fetchStatistics(
                 self.brand_input.text().strip(),
                 self.model_input.text().strip(),
                 self.date_input.text().strip(),
@@ -273,30 +304,31 @@ class StatisticScreen(QWidget):
                 self.status_input.text().strip()
             )
 
-            # Άνοιγμα του διαλόγου για επιλογή τοποθεσίας και ονόματος αρχείου
+            # create a file dialog to select the save location
             options = QFileDialog.Options()
             file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv);;All Files (*)", options=options)
 
-            # Ελέγχουμε αν ο χρήστης επέλεξε αρχείο
+            # check if the user selected a file
             if file_path:
-                # Κλήση της κλάσης ExportStatistics για να αποθηκεύσουμε τα δεδομένα
+                # call the ExportStatistics class to save the results
                 ExportStatistics.save_to_csv(results, file_path)
 
-                # Εμφάνιση ενημερωτικού μηνύματος ότι η εξαγωγή ήταν επιτυχής
                 self.show_success_message()
 
         except Exception as e:
             error_label = QLabel(f"Error: {e}")
             self.layout().addWidget(error_label)
 
-
+    # show success message after exporting
     def show_success_message(self):
-        # Δημιουργία του QMessageBox για την επιτυχία
         success_msg = QMessageBox(self)
         success_msg.setIcon(QMessageBox.Information)
         success_msg.setWindowTitle("Export Successful")
         success_msg.setText("Statistics exported successfully!")
         success_msg.setStandardButtons(QMessageBox.Ok)
         success_msg.exec_()
+
+
+
 
 

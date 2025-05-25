@@ -11,14 +11,20 @@ from PyQt5.QtGui import QPixmap
 from screens.StatisticScreen import StatisticScreen
 
 import requests
-from services.Map import Map
+from services.Map import Map as MapWidget
 from services.Pin import Pin
+from screens.ManagmentScreen import ManagmentScreen
+from screens.DetailsScreen import DetailsScreen
+from entities.VehicleListing import VehicleListing
 
 
 class MenuScreen(QWidget):
     def __init__(self, admin_user):
         super().__init__()
         self.admin_user = admin_user
+
+        self.listings = [] 
+
         self.setWindowTitle("Admin Menu")
         self.setStyleSheet("background-color: #f0f0f0;")
         self.setFixedSize(1300, 800)
@@ -100,7 +106,7 @@ class MenuScreen(QWidget):
             color: white;
             text-align: left;
         """)
-        report_button.clicked.connect(self.report_handling)
+        report_button.clicked.connect(self.reportHandling)
 
         report_button_frame = QFrame()
         report_button_frame.setStyleSheet("border: 2px solid #ccc; padding: 5px; border-radius: 5px;")
@@ -136,55 +142,76 @@ class MenuScreen(QWidget):
         nav_menu_frame.setStyleSheet("background-color: skyblue;")
         content_layout.addWidget(nav_menu_frame)
 
-        # === Map Widget ===
-        latitude, longitude = self.get_coordinates_from_address(self.admin_user)
-        self.map_widget = Map(latitude=latitude, longitude=longitude)
+        # Map Widget
+        latitude, longitude = self.get_user_coordinates()
+        self.map_widget = MapWidget(latitude=latitude, longitude=longitude)
         content_layout.addWidget(self.map_widget)
 
-        # Dummy listings to add pins (replace with real ones if needed)
-        listings = [
-            {"title": "Car A", "address": "Athens, Greece"},
-            {"title": "Car B", "address": "Thessaloniki, Greece"},
-            {"title": "Car C", "address": "Patras, Greece"}
-        ]
-        for listing in listings:
-            coords = self.get_coordinates_from_address_string(listing["address"])
-            if coords:
-                pin = Pin(latitude=coords[0], longitude=coords[1], title=listing["title"])
-                self.map_widget.place(pin)
+        # Fetch listings and place pins
+        self.fetch_listings()
+        self.place_pins()
 
-        # Add map widget to content layout
+        # Final layout
         main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
 
-    def reload_page(self, event):
-        self.close()
-        self.__init__(self.admin_user)
-        self.show()
+    def get_user_coordinates(self):
+        return 38.246639, 21.734573  # Default to Patras center
+        
 
-    def logout(self):
-        from screens.LoginPage import LoginPage
-        self.login_page = LoginPage()
-        self.login_page.show()
-        self.close()
+    # fetch listings from the database
+    def fetch_listings(self):
+        """Fetch all listings from the database and create VehicleListing instances."""
+        try:
+            db = DB.Database()
+            connection = db.connect()
 
-    def do_nothing(self, event):
-        pass
+            if connection is None:
+                print("Failed to connect to the database.")
+                return
 
-    def report_handling(self):
-        print("Report Handling is clicked!")
+            cursor = connection.cursor()
+            query = "SELECT id FROM vehicle_listing WHERE status = 'listed'"
+            cursor.execute(query)
+            results = cursor.fetchall()
 
-    def displayStatisticScreen(self):
-        print("View Statistics is clicked!")
-        self.admin_window = StatisticScreen(AD.Admin(self.admin_user.username))
-        self.admin_window.show()
-        self.close()
+            for row in results:
+                listing_id = row[0]
+                listing = VehicleListing(listing_id)
+                self.listings.append(listing)
 
-    def get_coordinates_from_address(self, user):
-        address = f"{getattr(user, 'street', 'Athens')}, {getattr(user, 'city', 'Athens')}, {getattr(user, 'country', 'Greece')}"
-        return self.get_coordinates_from_address_string(address)
+            cursor.close()
+            connection.close()
 
+            print(f"Fetched {len(self.listings)} listings from the database.")
+
+        except Exception as e:
+            print(f"An error occurred while fetching listings: {e}")
+
+    # place pins on the map
+    def place_pins(self):
+        """Convert addresses to coordinates and place pins on the map."""
+        for listing in self.listings:
+
+            if listing.country and listing.city and listing.street and listing.number:
+                address = f"{listing.street} {listing.number}, {listing.city}, {listing.country}"
+                coords = self.get_coordinates_from_address_string(address)
+                if coords:
+                    pin = Pin(latitude=coords[0], longitude=coords[1], title=f"Listing ID: {listing.id}")
+                    # Fix: lambda expects no arguments
+                    pin.clicked.connect(lambda l_id=listing.id: self.open_details_screen(l_id))
+                    self.map_widget.place(pin)
+
+    # open details screen if clicked 
+    def open_details_screen(self, listing_id):
+        """Open the DetailsScreen window for the selected listing."""
+        self.details_window = DetailsScreen(listing_id, user=self.admin_user)
+        self.details_window.show()
+
+
+    # convert address to coordinates using geocoding API
     def get_coordinates_from_address_string(self, address):
+        """Convert an address string to latitude and longitude using a geocoding API."""
         try:
             url = "https://nominatim.openstreetmap.org/search"
             params = {"q": address, "format": "json"}
@@ -197,4 +224,37 @@ class MenuScreen(QWidget):
                 return lat, lon
         except Exception as e:
             print(f"Geocoding error: {e}")
-        return 51.505, -0.09  # fallback
+        return None
+
+
+    # reload the page when logo is clicked
+    def reload_page(self, event):
+        self.close()
+        self.__init__(self.admin_user)
+        self.show()
+
+    # logout and go back to login page
+    def logout(self):
+        from screens.LoginPage import LoginPage
+        self.login_page = LoginPage()
+        self.login_page.show()
+        self.close()
+
+    def do_nothing(self, event):
+        pass
+
+    # open report handling screen
+    def reportHandling(self):
+        print("Report Handling is clicked!")
+        self.admin_window = ManagmentScreen(AD.Admin(self.admin_user.username))
+        self.admin_window.show()
+        self.close()
+    
+    # open statistics screen    
+    def displayStatisticScreen(self):
+        print("View Statistics is clicked!")
+        self.admin_window = StatisticScreen(AD.Admin(self.admin_user.username))
+        self.admin_window.show()
+        self.close()
+
+
