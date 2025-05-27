@@ -2,6 +2,7 @@ import services.Database as DB
 
 class FilterStatistics:
     @staticmethod
+<<<<<<< HEAD
     def fetchStatistics(brand="", model="", date="", vehicle_type="", status=""):
         conn = DB.Database.connect()
         if conn and conn.is_connected():
@@ -9,6 +10,12 @@ class FilterStatistics:
 
             # get the filtered statistics
             
+=======
+    def fetch_statistics(brand="", model="", date="", vehicle_type="", status=""):
+        conn = DB.Database.connect()
+        if conn and conn.is_connected():
+            cursor = conn.cursor()
+>>>>>>> Babis
             try:
                 query = """
                     SELECT brand, model, vehicle_type, status, COUNT(*) as total_listings

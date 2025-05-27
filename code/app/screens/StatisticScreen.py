@@ -73,7 +73,11 @@ class StatisticScreen(QWidget):
         top_menu_frame.setStyleSheet("background-color: skyblue; padding: 10px;")
         main_layout.addWidget(top_menu_frame)
 
+<<<<<<< HEAD
         # Main Content with Sidebar 
+=======
+        # --- Main Content with Sidebar ---
+>>>>>>> Babis
         content_layout = QHBoxLayout()
 
         # Sidebar with filters
@@ -118,9 +122,15 @@ class StatisticScreen(QWidget):
             border: none;
             border-radius: 4px;
         """)
+<<<<<<< HEAD
         graph_button.clicked.connect(self.showGraph)
 
         # Export Statistics
+=======
+        graph_button.clicked.connect(self.show_graph)
+
+        # Προσθήκη του κουμπιού Export Statistics
+>>>>>>> Babis
         export_button = QPushButton("Export Statistics")
         export_button.setStyleSheet(""" 
             padding: 6px;
@@ -130,7 +140,11 @@ class StatisticScreen(QWidget):
             border: none;
             border-radius: 4px;
         """)
+<<<<<<< HEAD
         export_button.clicked.connect(self.exportData)
+=======
+        export_button.clicked.connect(self.export_statistics)
+>>>>>>> Babis
 
         sidebar_layout.addWidget(self.brand_input)
         sidebar_layout.addWidget(self.model_input)
@@ -150,6 +164,7 @@ class StatisticScreen(QWidget):
 
         # Table
         self.table_widget = QTableWidget()
+<<<<<<< HEAD
         self.table_widget.setColumnCount(5)
         self.table_widget.setHorizontalHeaderLabels(["Brand", "Model", "Vehicle Type", "Status", "Total Listings"])
         self.table_widget.setShowGrid(False)
@@ -200,6 +215,27 @@ class StatisticScreen(QWidget):
             }
         """)
 
+=======
+        self.table_widget.setColumnCount(5)  # 5 columns (brand, model, vehicle_type, status, count)
+        self.table_widget.setHorizontalHeaderLabels(["Brand", "Model", "Vehicle Type", "Status", "Total Listings"])
+        self.table_widget.setStyleSheet(""" 
+            QTableWidget {
+                font-size: 14px;
+                gridline-color: #ccc;
+                border: 1px solid #ccc;
+            }
+            QHeaderView::section {
+                background-color: lightgray;
+                font-weight: bold;
+                padding: 6px;
+                border: none;
+            }
+        """)
+        self.table_widget.setShowGrid(True)
+        self.table_widget.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.table_widget.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table_widget.setAlternatingRowColors(True)
+>>>>>>> Babis
 
         content_layout.addWidget(self.table_widget)
         main_layout.addLayout(content_layout)
@@ -211,8 +247,13 @@ class StatisticScreen(QWidget):
     def filter(self, brand_filter="", model_filter="", date_filter="", vehicle_type_filter="", status_filter=""):
         self.table_widget.setRowCount(0)
         try:
+<<<<<<< HEAD
             results = FilterStatistics.fetchStatistics(brand_filter, model_filter, date_filter, vehicle_type_filter, status_filter)
             self.displayStatistics(results)
+=======
+            results = FilterStatistics.fetch_statistics(brand_filter, model_filter, date_filter, vehicle_type_filter, status_filter)
+            self.display_statistics(results)
+>>>>>>> Babis
         except Exception as e:
             error_label = QLabel(f"Error: {e}")
             self.layout().addWidget(error_label)
@@ -225,7 +266,11 @@ class StatisticScreen(QWidget):
         status = self.status_input.text().strip()
         self.filter(brand_filter=brand, model_filter=model, date_filter=date, vehicle_type_filter=vehicle_type, status_filter=status)
 
+<<<<<<< HEAD
     def displayStatistics(self, results):
+=======
+    def display_statistics(self, results):
+>>>>>>> Babis
         # Populate the table with the results
         self.table_widget.setRowCount(len(results))
         for row_index, row_data in enumerate(results):
@@ -270,9 +315,15 @@ class StatisticScreen(QWidget):
     def do_nothing(self, event):
         pass
 
+<<<<<<< HEAD
     def showGraph(self):
         try:
             results = FilterStatistics.fetchStatistics(
+=======
+    def show_graph(self):
+        try:
+            results = FilterStatistics.fetch_statistics(
+>>>>>>> Babis
                 self.brand_input.text().strip(),
                 self.model_input.text().strip(),
                 self.date_input.text().strip(),
@@ -280,11 +331,19 @@ class StatisticScreen(QWidget):
                 self.status_input.text().strip()
             )
 
+<<<<<<< HEAD
             # create the Graph object and generate graphs
             graph = Graph(results)
             graph_html_paths = graph.create_graphs()  # HTML files 
 
             # show the graphs in a new window
+=======
+            # Δημιουργία γραφημάτων με Plotly
+            graph = Graph(results)
+            graph_html_paths = graph.create_graphs()  # HTML files για τα γραφήματα
+
+            # Εμφάνιση των γραφημάτων στην οθόνη
+>>>>>>> Babis
             self.graph_screen = GraphScreen(graph_html_paths)
             self.graph_screen.show()
 
@@ -293,10 +352,17 @@ class StatisticScreen(QWidget):
             self.layout().addWidget(error_label)
 
 
+<<<<<<< HEAD
     def exportData(self):
         try:
             # get the filtered statistics
             results = FilterStatistics.fetchStatistics(
+=======
+    def export_statistics(self):
+        try:
+            # Παίρνουμε τα αποτελέσματα
+            results = FilterStatistics.fetch_statistics(
+>>>>>>> Babis
                 self.brand_input.text().strip(),
                 self.model_input.text().strip(),
                 self.date_input.text().strip(),
@@ -304,6 +370,7 @@ class StatisticScreen(QWidget):
                 self.status_input.text().strip()
             )
 
+<<<<<<< HEAD
             # create a file dialog to select the save location
             options = QFileDialog.Options()
             file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv);;All Files (*)", options=options)
@@ -313,14 +380,32 @@ class StatisticScreen(QWidget):
                 # call the ExportStatistics class to save the results
                 ExportStatistics.save_to_csv(results, file_path)
 
+=======
+            # Άνοιγμα του διαλόγου για επιλογή τοποθεσίας και ονόματος αρχείου
+            options = QFileDialog.Options()
+            file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv);;All Files (*)", options=options)
+
+            # Ελέγχουμε αν ο χρήστης επέλεξε αρχείο
+            if file_path:
+                # Κλήση της κλάσης ExportStatistics για να αποθηκεύσουμε τα δεδομένα
+                ExportStatistics.save_to_csv(results, file_path)
+
+                # Εμφάνιση ενημερωτικού μηνύματος ότι η εξαγωγή ήταν επιτυχής
+>>>>>>> Babis
                 self.show_success_message()
 
         except Exception as e:
             error_label = QLabel(f"Error: {e}")
             self.layout().addWidget(error_label)
 
+<<<<<<< HEAD
     # show success message after exporting
     def show_success_message(self):
+=======
+
+    def show_success_message(self):
+        # Δημιουργία του QMessageBox για την επιτυχία
+>>>>>>> Babis
         success_msg = QMessageBox(self)
         success_msg.setIcon(QMessageBox.Information)
         success_msg.setWindowTitle("Export Successful")
@@ -329,6 +414,9 @@ class StatisticScreen(QWidget):
         success_msg.exec_()
 
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> Babis

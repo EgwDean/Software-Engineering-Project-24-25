@@ -4,6 +4,7 @@ class ExportStatistics:
     @staticmethod
     def save_to_csv(results, file_path="statistics.csv"):
         try:
+<<<<<<< HEAD
             # notify if results is empty
             if not results:
                 raise ValueError("No data to export.")
@@ -16,6 +17,20 @@ class ExportStatistics:
                 writer.writerow(["Brand", "Model", "Vehicle Type", "Status", "Total Listings"])
                 
                 # write the data
+=======
+            # Αν τα αποτελέσματα είναι κενά, επιστρέφουμε άμεση ειδοποίηση
+            if not results:
+                raise ValueError("No data to export.")
+
+            # Άνοιγμα αρχείου για εγγραφή
+            with open(file_path, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                
+                # Γράφουμε την επικεφαλίδα (headers)
+                writer.writerow(["Brand", "Model", "Vehicle Type", "Status", "Total Listings"])
+                
+                # Γράφουμε τα δεδομένα
+>>>>>>> Babis
                 for row in results:
                     writer.writerow(row)
 
