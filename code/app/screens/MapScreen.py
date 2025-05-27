@@ -29,6 +29,17 @@ class MapScreen(QWidget):
         main_layout.setContentsMargins(0, 0, 0, 0)
 
         # === Top menu ===
+<<<<<<< HEAD
+        self._init_top_menu()
+        self._init_content_layout()
+
+        self.setLayout(self.main_layout)
+
+        # self.search = Search(self.map_widget)
+
+    def _init_top_menu(self):
+=======
+>>>>>>> Babis
         top_menu_layout = QHBoxLayout()
         top_menu_layout.setAlignment(Qt.AlignLeft)
 
@@ -106,7 +117,11 @@ class MapScreen(QWidget):
         top_menu_frame = QFrame()
         top_menu_frame.setLayout(top_menu_layout)
         top_menu_frame.setStyleSheet("background-color: skyblue; padding: 10px;")
+<<<<<<< HEAD
+        self.main_layout.addWidget(top_menu_frame)
+=======
         main_layout.addWidget(top_menu_frame)
+>>>>>>> Babis
 
         # === Content layout ===
         content_layout = QHBoxLayout()
@@ -157,6 +172,22 @@ class MapScreen(QWidget):
         """)
         create_btn.clicked.connect(self.open_create_screen)
         nav_menu.addWidget(create_btn)
+<<<<<<< HEAD
+
+        # Add any remaining TODO buttons if needed
+        for i in range(2):
+            button = QPushButton(f"TODO {i + 3}")
+            button.setStyleSheet("""
+                padding: 10px;
+                font-size: 14px;
+                background-color: skyblue;
+                border: none;
+                color: black;
+                text-align: left;
+                border: 1px solid black;
+            """)
+            nav_menu.addWidget(button)
+=======
         
         
          # Subscription button
@@ -189,6 +220,7 @@ class MapScreen(QWidget):
 
 
 
+>>>>>>> Babis
 
         nav_menu.addStretch()
 
@@ -207,8 +239,13 @@ class MapScreen(QWidget):
         self.fetch_listings()
         self.place_pins()
 
+<<<<<<< HEAD
+        self.main_layout.addLayout(content_layout)
+        self.setLayout(self.main_layout)
+=======
         main_layout.addLayout(content_layout)
         self.setLayout(main_layout)
+>>>>>>> Babis
 
     def get_user_coordinates(self):
         """Fetch the user's address and convert it to coordinates."""
@@ -357,6 +394,9 @@ class MapScreen(QWidget):
         self.fetch_listings()  # Re-fetch all listings
         self.map_widget.clear_pins()  # Clear existing pins on the map
         self.place_pins()  # Place all pins again
+<<<<<<< HEAD
+        print("Filters cleared and pins reloaded.")
+=======
         print("Filters cleared and pins reloaded.")
         
         
@@ -380,3 +420,4 @@ class MapScreen(QWidget):
         from screens.PendingLeasesScreen import PendingLeasesScreen 
         self.pending_leases_screen = PendingLeasesScreen(self.user)
         self.pending_leases_screen.show()
+>>>>>>> Babis

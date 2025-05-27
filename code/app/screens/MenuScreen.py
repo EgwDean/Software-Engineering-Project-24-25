@@ -11,14 +11,28 @@ from PyQt5.QtGui import QPixmap
 from screens.StatisticScreen import StatisticScreen
 
 import requests
+<<<<<<< HEAD
+from services.Map import Map as MapWidget
+from services.Pin import Pin
+from screens.ManagmentScreen import ManagmentScreen
+from screens.DetailsScreen import DetailsScreen
+from entities.VehicleListing import VehicleListing
+=======
 from services.Map import Map
 from services.Pin import Pin
+>>>>>>> Babis
 
 
 class MenuScreen(QWidget):
     def __init__(self, admin_user):
         super().__init__()
         self.admin_user = admin_user
+<<<<<<< HEAD
+
+        self.listings = [] 
+
+=======
+>>>>>>> Babis
         self.setWindowTitle("Admin Menu")
         self.setStyleSheet("background-color: #f0f0f0;")
         self.setFixedSize(1300, 800)

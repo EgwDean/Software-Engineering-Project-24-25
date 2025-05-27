@@ -166,10 +166,13 @@ class BookPage(QWidget):
                 "INSERT INTO rents (user_who_rents, from_date, number_of_days, id_of_listing) VALUES (%s,%s,%s,%s)",
                 (self.user.username, s.strftime('%Y-%m-%d'), days, self.listing['id'])
             )
+<<<<<<< HEAD
+=======
             cur.execute(
                 "UPDATE user SET balance=balance-%s WHERE username=%s",
                 (total, self.user.username)
             )
+>>>>>>> Babis
             conn.commit()
             self.user.balance -= total
             QMessageBox.information(self, "Success", "Booking confirmed!")
