@@ -4,11 +4,7 @@ import os
 
 class Graph:
     def __init__(self, data):
-<<<<<<< HEAD
         self.data = data
-=======
-        self.data = data  # data is a list of tuples (brand, model, vehicle_type, status, count)
->>>>>>> Babis
 
     def create_graphs(self):
         html_paths = []
@@ -65,11 +61,7 @@ class Graph:
             plot_bgcolor="white"
         )
 
-<<<<<<< HEAD
         # Save the pie chart as an HTML file 
-=======
-        # Save the pie chart as an HTML file
->>>>>>> Babis
         output_path = f"pie_chart_{index}.html"
         fig.write_html(output_path)
         return output_path

@@ -11,28 +11,20 @@ from PyQt5.QtGui import QPixmap
 from screens.StatisticScreen import StatisticScreen
 
 import requests
-<<<<<<< HEAD
 from services.Map import Map as MapWidget
 from services.Pin import Pin
 from screens.ManagmentScreen import ManagmentScreen
 from screens.DetailsScreen import DetailsScreen
 from entities.VehicleListing import VehicleListing
-=======
-from services.Map import Map
-from services.Pin import Pin
->>>>>>> Babis
 
 
 class MenuScreen(QWidget):
     def __init__(self, admin_user):
         super().__init__()
         self.admin_user = admin_user
-<<<<<<< HEAD
 
         self.listings = [] 
 
-=======
->>>>>>> Babis
         self.setWindowTitle("Admin Menu")
         self.setStyleSheet("background-color: #f0f0f0;")
         self.setFixedSize(1300, 800)
@@ -114,11 +106,7 @@ class MenuScreen(QWidget):
             color: white;
             text-align: left;
         """)
-<<<<<<< HEAD
         report_button.clicked.connect(self.reportHandling)
-=======
-        report_button.clicked.connect(self.report_handling)
->>>>>>> Babis
 
         report_button_frame = QFrame()
         report_button_frame.setStyleSheet("border: 2px solid #ccc; padding: 5px; border-radius: 5px;")
@@ -154,7 +142,6 @@ class MenuScreen(QWidget):
         nav_menu_frame.setStyleSheet("background-color: skyblue;")
         content_layout.addWidget(nav_menu_frame)
 
-<<<<<<< HEAD
         # Map Widget
         latitude, longitude = self.get_user_coordinates()
         self.map_widget = MapWidget(latitude=latitude, longitude=longitude)
@@ -225,57 +212,6 @@ class MenuScreen(QWidget):
     # convert address to coordinates using geocoding API
     def get_coordinates_from_address_string(self, address):
         """Convert an address string to latitude and longitude using a geocoding API."""
-=======
-        # === Map Widget ===
-        latitude, longitude = self.get_coordinates_from_address(self.admin_user)
-        self.map_widget = Map(latitude=latitude, longitude=longitude)
-        content_layout.addWidget(self.map_widget)
-
-        # Dummy listings to add pins (replace with real ones if needed)
-        listings = [
-            {"title": "Car A", "address": "Athens, Greece"},
-            {"title": "Car B", "address": "Thessaloniki, Greece"},
-            {"title": "Car C", "address": "Patras, Greece"}
-        ]
-        for listing in listings:
-            coords = self.get_coordinates_from_address_string(listing["address"])
-            if coords:
-                pin = Pin(latitude=coords[0], longitude=coords[1], title=listing["title"])
-                self.map_widget.place(pin)
-
-        # Add map widget to content layout
-        main_layout.addLayout(content_layout)
-        self.setLayout(main_layout)
-
-    def reload_page(self, event):
-        self.close()
-        self.__init__(self.admin_user)
-        self.show()
-
-    def logout(self):
-        from screens.LoginPage import LoginPage
-        self.login_page = LoginPage()
-        self.login_page.show()
-        self.close()
-
-    def do_nothing(self, event):
-        pass
-
-    def report_handling(self):
-        print("Report Handling is clicked!")
-
-    def displayStatisticScreen(self):
-        print("View Statistics is clicked!")
-        self.admin_window = StatisticScreen(AD.Admin(self.admin_user.username))
-        self.admin_window.show()
-        self.close()
-
-    def get_coordinates_from_address(self, user):
-        address = f"{getattr(user, 'street', 'Athens')}, {getattr(user, 'city', 'Athens')}, {getattr(user, 'country', 'Greece')}"
-        return self.get_coordinates_from_address_string(address)
-
-    def get_coordinates_from_address_string(self, address):
->>>>>>> Babis
         try:
             url = "https://nominatim.openstreetmap.org/search"
             params = {"q": address, "format": "json"}
@@ -288,7 +224,6 @@ class MenuScreen(QWidget):
                 return lat, lon
         except Exception as e:
             print(f"Geocoding error: {e}")
-<<<<<<< HEAD
         return None
 
 
@@ -323,6 +258,3 @@ class MenuScreen(QWidget):
         self.close()
 
 
-=======
-        return 51.505, -0.09  # fallback
->>>>>>> Babis
