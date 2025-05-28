@@ -1,19 +1,20 @@
 -- Εισαγωγή Εγγραφών στον Πίνακα user
-INSERT INTO user (username, password, phone, email, balance, bank_id, message)
+INSERT INTO user (username, password, phone, email, balance, bank_id, message, status)
 VALUES
-('user1', 'password1', '1234567890', 'user1@example.com', 1000.0, 123456789, NULL),
-('user2', 'password2', '1234567891', 'user2@example.com', 1500.0, 987654321, NULL),
-('user3', 'password3', '1234567892', 'user3@example.com', 2000.0, 112233445, NULL),
-('user4', 'password4', '1234567893', 'user4@example.com', 2500.0, 998877665, NULL),
-('user5', 'password5', '1234567894', 'user5@example.com', 3000.0, 443322110, NULL),
-('user6', 'password6', '1234567895', 'user6@example.com', 3500.0, 556677889, NULL),
-('user7', 'password7', '1234567896', 'user7@example.com', 4000.0, 998822330, NULL),
-('user8', 'password8', '1234567897', 'user8@example.com', 4500.0, 667788990, NULL),
-('user9', 'password9', '1234567898', 'user9@example.com', 5000.0, 778899665, NULL),
-('user10', 'password10', '1234567899', 'user10@example.com', 5500.0, 223344556, NULL),
-('1', '1', '1111111111', '1@1.com', 5500.0, 223344556, NULL),
-('2', '2', '2222222222', '2@2.com', 5500.0, 223344557, NULL),
-('3', '3', '3333333333', '3@3.com', 5500.0, 223344558, NULL);
+('user1', 'password1', '1234567890', 'user1@example.com', 1000.0, 123456789, NULL, 'active'),
+('user2', 'password2', '1234567891', 'user2@example.com', 1500.0, 987654321, NULL, 'active'),
+('user3', 'password3', '1234567892', 'user3@example.com', 2000.0, 112233445, NULL, 'active'),
+('user4', 'password4', '1234567893', 'user4@example.com', 2500.0, 998877665, NULL, 'active'),
+('user5', 'password5', '1234567894', 'user5@example.com', 3000.0, 443322110, NULL, 'active'),
+('user6', 'password6', '1234567895', 'user6@example.com', 3500.0, 556677889, NULL, 'active'),
+('user7', 'password7', '1234567896', 'user7@example.com', 4000.0, 998822330, NULL, 'active'),
+('user8', 'password8', '1234567897', 'user8@example.com', 4500.0, 667788990, NULL, 'active'),
+('user9', 'password9', '1234567898', 'user9@example.com', 5000.0, 778899665, NULL, 'active'),
+('user10', 'password10', '1234567899', 'user10@example.com', 5500.0, 223344556, NULL, 'active'),
+('1', '1', '1111111111', '1@1.com', 5500.0, 223344556, NULL, 'active'),
+('2', '2', '2222222222', '2@2.com', 5500.0, 223344557, NULL, 'active'),
+('3', '3', '3333333333', '3@3.com', 5500.0, 223344558, NULL, 'active'),
+('4', '4', '3333333333', '3@3.com', 5500.0, 223344558, NULL, 'active');
 
 -- Εισαγωγή Εγγραφών στον Πίνακα address
 INSERT INTO address (username_address, country, city, street, number)
