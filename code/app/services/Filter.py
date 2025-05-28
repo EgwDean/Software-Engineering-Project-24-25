@@ -121,7 +121,7 @@ class Filter(QDialog):
                 street, number, city, country
                 FROM vehicle_listing INNER JOIN User ON name_of_user = username 
                 INNER JOIN address ON username_address = username
-                WHERE status = 'listed'
+                WHERE vehicle_listing.status = 'listed'
             """
             params = []
 
