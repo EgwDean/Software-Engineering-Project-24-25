@@ -30,12 +30,14 @@ class StandardUser:
 
             # Query the user table
             cursor = connection.cursor()
-            user_query = "SELECT password, phone, email, balance, bank_id, message FROM user WHERE username = %s"
+            user_query = "SELECT password, phone, email, balance, bank_id FROM user WHERE username = %s"
             cursor.execute(user_query, (self.username,))
             user_result = cursor.fetchone()
 
             if user_result:
-                self.password, self.phone, self.email, self.balance, self.bank_id, self.message = user_result
+                self.password, self.phone, self.email, self.balance, self.bank_id = user_result
+                if self.balance is None:
+                    self.balance = 0.0
                 print(f"User data fetched for {self.username}: {user_result}")
             else:
                 print(f"No user found with username: {self.username}")
