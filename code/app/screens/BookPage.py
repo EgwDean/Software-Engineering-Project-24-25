@@ -57,7 +57,8 @@ class BookPage(QWidget):
         back_btn.clicked.connect(self.close)
         top_bar.addWidget(back_btn)
         top_bar.addStretch()
-        balance_lbl = QLabel(f"Balance: €{self.user.balance:.2f}")
+        balance = self.user.balance if self.user.balance is not None else 0.0
+        balance_lbl = QLabel(f"Balance: €{balance:.2f}")
         balance_lbl.setStyleSheet("font-size: 18px; padding: 10px; color: #333;")
         top_bar.addWidget(balance_lbl)
         layout.addLayout(top_bar)
