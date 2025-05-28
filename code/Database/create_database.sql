@@ -10,7 +10,7 @@ CREATE TABLE user (
 	email VARCHAR(50),
     balance FLOAT,
     bank_id BIGINT,
-    message TEXT
+    status ENUM('active', 'suspended')
 );
 
 CREATE TABLE admin (
