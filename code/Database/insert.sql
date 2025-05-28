@@ -1,20 +1,19 @@
 -- Εισαγωγή Εγγραφών στον Πίνακα user
-INSERT INTO user (username, password, phone, email, balance, bank_id, message, status)
+INSERT INTO user (username, password, phone, email, balance, bank_id)
 VALUES
-('user1', 'password1', '1234567890', 'user1@example.com', 1000.0, 123456789, NULL, 'active'),
-('user2', 'password2', '1234567891', 'user2@example.com', 1500.0, 987654321, NULL, 'active'),
-('user3', 'password3', '1234567892', 'user3@example.com', 2000.0, 112233445, NULL, 'active'),
-('user4', 'password4', '1234567893', 'user4@example.com', 2500.0, 998877665, NULL, 'active'),
-('user5', 'password5', '1234567894', 'user5@example.com', 3000.0, 443322110, NULL, 'active'),
-('user6', 'password6', '1234567895', 'user6@example.com', 3500.0, 556677889, NULL, 'active'),
-('user7', 'password7', '1234567896', 'user7@example.com', 4000.0, 998822330, NULL, 'active'),
-('user8', 'password8', '1234567897', 'user8@example.com', 4500.0, 667788990, NULL, 'active'),
-('user9', 'password9', '1234567898', 'user9@example.com', 5000.0, 778899665, NULL, 'active'),
-('user10', 'password10', '1234567899', 'user10@example.com', 5500.0, 223344556, NULL, 'active'),
-('1', '1', '1111111111', '1@1.com', 5500.0, 223344556, NULL, 'active'),
-('2', '2', '2222222222', '2@2.com', 5500.0, 223344557, NULL, 'active'),
-('3', '3', '3333333333', '3@3.com', 5500.0, 223344558, NULL, 'active'),
-('4', '4', '3333333333', '3@3.com', 5500.0, 223344558, NULL, 'active');
+('user1', 'password1', '1234567890', 'user1@example.com', 1000.0, 123456789),
+('user2', 'password2', '1234567891', 'user2@example.com', 1500.0, 987654321),
+('user3', 'password3', '1234567892', 'user3@example.com', 2000.0, 112233445),
+('user4', 'password4', '1234567893', 'user4@example.com', 2500.0, 998877665),
+('user5', 'password5', '1234567894', 'user5@example.com', 3000.0, 443322110),
+('user6', 'password6', '1234567895', 'user6@example.com', 3500.0, 556677889),
+('user7', 'password7', '1234567896', 'user7@example.com', 4000.0, 998822330),
+('user8', 'password8', '1234567897', 'user8@example.com', 4500.0, 667788990),
+('user9', 'password9', '1234567898', 'user9@example.com', 5000.0, 778899665),
+('user10', 'password10', '1234567899', 'user10@example.com', 5500.0, 223344556),
+('1', '1', '1111111111', '1@1.com', 5500.0, 223344556),
+('2', '2', '2222222222', '2@2.com', 5500.0, 223344557),
+('3', '3', '3333333333', '3@3.com', 5500.0, 223344558);
 
 -- Εισαγωγή Εγγραφών στον Πίνακα address
 INSERT INTO address (username_address, country, city, street, number)
@@ -47,7 +46,7 @@ VALUES
 ('user9', 100.0, 'Car', 'Audi', 'A4', '2020', '20000', 'Gasoline', 'Compact luxury car for daily use', '2025-01-01', '2025-12-31', 'pending'),
 ('user10', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'completed'),
 ('2', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'listed'),
-('3', 200.0, 'Truck', 'Kenworth', 'T680', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'listed');
+('3', 200.0, 'Car', 'Toyota', 'Corolla', '2022', '25000', 'Diesel', 'Heavy-duty truck with great mileage', '2025-01-01', '2025-12-31', 'listed');
 
 
 -- Εισαγωγή Εγγραφών στον Πίνακα admin
@@ -100,16 +99,16 @@ VALUES
 -- Εισαγωγή Εγγραφών στον Πίνακα rents
 INSERT INTO rents (user_who_rents, from_date, number_of_days, id_of_listing)
 VALUES
-('user1', '2025-01-01', 7, 10),
-('user2', '2025-02-01', 5, 9),
-('user3', '2025-03-01', 3, 8),
-('user4', '2025-04-01', 10, 7),
-('user5', '2025-05-01', 8, 6),
-('user6', '2025-06-01', 12, 5),
-('user7', '2025-07-01', 4, 4),
-('user8', '2025-08-01', 15, 3),
-('user9', '2025-09-01', 6, 2),
-('user10', '2025-10-01', 20, 1);
+('user1', '2025-01-01', 7, 1),
+('user2', '2025-02-01', 5, 2),
+('user3', '2025-03-01', 3, 3),
+('user4', '2025-04-01', 10, 4),
+('user5', '2025-05-01', 8, 5),
+('user6', '2025-06-01', 12, 6),
+('user7', '2025-07-01', 4, 7),
+('user8', '2025-08-01', 15, 8),
+('user9', '2025-09-01', 6, 9),
+('user10', '2025-10-01', 20, 10);
 
 -- Εισαγωγή Εγγραφών στον Πίνακα reports
 INSERT INTO reports (name_reporter, comment, date_of_report, id_list_report)
