@@ -1,5 +1,5 @@
-<h1>Software-Engineering-Project-24-25</h1>h1
-<h3>Software engineering project of the CEID undergraduate course "Software Technology".</h3>h3
+<h1>Software-Engineering-Project-24-25</h1>
+<h3>Software engineering project of the CEID undergraduate course "Software Technology".</h3>
 
 The application titled CaRent is a web-based, peer-to-peer vehicle rental system. It supports two types of users: regular users and administrators.
 
